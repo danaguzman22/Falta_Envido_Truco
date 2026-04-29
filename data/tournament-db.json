@@ -1,465 +1,495 @@
 {
-  "equipos": [],
-  "torneo": {
-    "id": "torneo-utn-2026",
-    "nombre": "Falta Envido y Truco",
-    "totalEquipos": 32,
-    "estado": "INSCRIPCION_ABIERTA",
-    "rondas": [
-      [
-        {
-          "id": "match_mojhh6tz_h2ys9abr",
-          "rondaIndex": 0,
-          "partidoIndex": 0,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_zjlfb8l3",
-          "rondaIndex": 0,
-          "partidoIndex": 1,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_j0zcgjsc",
-          "rondaIndex": 0,
-          "partidoIndex": 2,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_35jeuks4",
-          "rondaIndex": 0,
-          "partidoIndex": 3,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_nyq1pp3y",
-          "rondaIndex": 0,
-          "partidoIndex": 4,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_e6xe7g4r",
-          "rondaIndex": 0,
-          "partidoIndex": 5,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_8wha8ryi",
-          "rondaIndex": 0,
-          "partidoIndex": 6,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_8smupo7i",
-          "rondaIndex": 0,
-          "partidoIndex": 7,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_j3yawkwk",
-          "rondaIndex": 0,
-          "partidoIndex": 8,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_ijvxwyi5",
-          "rondaIndex": 0,
-          "partidoIndex": 9,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_99jwz3lh",
-          "rondaIndex": 0,
-          "partidoIndex": 10,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_jzbq6bo5",
-          "rondaIndex": 0,
-          "partidoIndex": 11,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_vs7xkpjt",
-          "rondaIndex": 0,
-          "partidoIndex": 12,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_fd04qpq5",
-          "rondaIndex": 0,
-          "partidoIndex": 13,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_jqtufwav",
-          "rondaIndex": 0,
-          "partidoIndex": 14,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_dlnb16se",
-          "rondaIndex": 0,
-          "partidoIndex": 15,
-          "slotA": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "A confirmar",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        }
-      ],
-      [
-        {
-          "id": "match_mojhh6tz_u3898cck",
-          "rondaIndex": 1,
-          "partidoIndex": 0,
-          "slotA": {
-            "sourceLabel": "Ganador 1 / 2",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 1 / 2",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_p57hz32y",
-          "rondaIndex": 1,
-          "partidoIndex": 1,
-          "slotA": {
-            "sourceLabel": "Ganador 3 / 4",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 3 / 4",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_ec08v3ul",
-          "rondaIndex": 1,
-          "partidoIndex": 2,
-          "slotA": {
-            "sourceLabel": "Ganador 5 / 6",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 5 / 6",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_etn6shpg",
-          "rondaIndex": 1,
-          "partidoIndex": 3,
-          "slotA": {
-            "sourceLabel": "Ganador 7 / 8",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 7 / 8",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_49g9pwsk",
-          "rondaIndex": 1,
-          "partidoIndex": 4,
-          "slotA": {
-            "sourceLabel": "Ganador 9 / 10",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 9 / 10",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_ow0rw9j4",
-          "rondaIndex": 1,
-          "partidoIndex": 5,
-          "slotA": {
-            "sourceLabel": "Ganador 11 / 12",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 11 / 12",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_uizjpq57",
-          "rondaIndex": 1,
-          "partidoIndex": 6,
-          "slotA": {
-            "sourceLabel": "Ganador 13 / 14",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 13 / 14",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_klri1xrf",
-          "rondaIndex": 1,
-          "partidoIndex": 7,
-          "slotA": {
-            "sourceLabel": "Ganador 15 / 16",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 15 / 16",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        }
-      ],
-      [
-        {
-          "id": "match_mojhh6tz_px3wqpbu",
-          "rondaIndex": 2,
-          "partidoIndex": 0,
-          "slotA": {
-            "sourceLabel": "Ganador 1 / 2",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 1 / 2",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_yupt87ou",
-          "rondaIndex": 2,
-          "partidoIndex": 1,
-          "slotA": {
-            "sourceLabel": "Ganador 3 / 4",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 3 / 4",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_im524ezz",
-          "rondaIndex": 2,
-          "partidoIndex": 2,
-          "slotA": {
-            "sourceLabel": "Ganador 5 / 6",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 5 / 6",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_jlqvejqa",
-          "rondaIndex": 2,
-          "partidoIndex": 3,
-          "slotA": {
-            "sourceLabel": "Ganador 7 / 8",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 7 / 8",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        }
-      ],
-      [
-        {
-          "id": "match_mojhh6tz_tv2y8z2h",
-          "rondaIndex": 3,
-          "partidoIndex": 0,
-          "slotA": {
-            "sourceLabel": "Ganador 1 / 2",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 1 / 2",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        },
-        {
-          "id": "match_mojhh6tz_owu7irii",
-          "rondaIndex": 3,
-          "partidoIndex": 1,
-          "slotA": {
-            "sourceLabel": "Ganador 3 / 4",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 3 / 4",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        }
-      ],
-      [
-        {
-          "id": "match_mojhh6tz_08uk0h5c",
-          "rondaIndex": 4,
-          "partidoIndex": 0,
-          "slotA": {
-            "sourceLabel": "Ganador 1 / 2",
-            "equipoId": null
-          },
-          "slotB": {
-            "sourceLabel": "Ganador 1 / 2",
-            "equipoId": null
-          },
-          "ganadorEquipoId": null
-        }
-      ]
-    ],
-    "generadoEn": null
-  },
-  "admins": [
-    {
-      "email": "dannaguman@gmail.com",
-      "status": "activo",
-      "ultimoIngresoEn": "2026-04-29T16:44:21.763Z",
-      "creadoEn": "2026-04-29T16:40:20.3657787Z",
-      "passwordHash": "$2b$10$nTDgRjEO2hwWy.IEyOl.B.brdm63jspR52klbf9Z3n/oPd37HaVLe"
-    }
-  ]
+    "equipos":  [
+
+                ],
+    "torneo":  {
+                   "id":  "torneo-utn-2026",
+                   "nombre":  "Falta Envido y Truco",
+                   "totalEquipos":  32,
+                   "estado":  "INSCRIPCION_ABIERTA",
+                   "rondas":  [
+                                  [
+                                      {
+                                          "id":  "match_mojhh6tz_h2ys9abr",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  0,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_zjlfb8l3",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  1,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_j0zcgjsc",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  2,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_35jeuks4",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  3,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_nyq1pp3y",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  4,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_e6xe7g4r",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  5,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_8wha8ryi",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  6,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_8smupo7i",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  7,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_j3yawkwk",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  8,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_ijvxwyi5",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  9,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_99jwz3lh",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  10,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_jzbq6bo5",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  11,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_vs7xkpjt",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  12,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_fd04qpq5",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  13,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_jqtufwav",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  14,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_dlnb16se",
+                                          "rondaIndex":  0,
+                                          "partidoIndex":  15,
+                                          "slotA":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "A confirmar",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      }
+                                  ],
+                                  [
+                                      {
+                                          "id":  "match_mojhh6tz_u3898cck",
+                                          "rondaIndex":  1,
+                                          "partidoIndex":  0,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 1 / 2",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 1 / 2",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_p57hz32y",
+                                          "rondaIndex":  1,
+                                          "partidoIndex":  1,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 3 / 4",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 3 / 4",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_ec08v3ul",
+                                          "rondaIndex":  1,
+                                          "partidoIndex":  2,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 5 / 6",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 5 / 6",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_etn6shpg",
+                                          "rondaIndex":  1,
+                                          "partidoIndex":  3,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 7 / 8",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 7 / 8",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_49g9pwsk",
+                                          "rondaIndex":  1,
+                                          "partidoIndex":  4,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 9 / 10",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 9 / 10",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_ow0rw9j4",
+                                          "rondaIndex":  1,
+                                          "partidoIndex":  5,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 11 / 12",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 11 / 12",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_uizjpq57",
+                                          "rondaIndex":  1,
+                                          "partidoIndex":  6,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 13 / 14",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 13 / 14",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_klri1xrf",
+                                          "rondaIndex":  1,
+                                          "partidoIndex":  7,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 15 / 16",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 15 / 16",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      }
+                                  ],
+                                  [
+                                      {
+                                          "id":  "match_mojhh6tz_px3wqpbu",
+                                          "rondaIndex":  2,
+                                          "partidoIndex":  0,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 1 / 2",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 1 / 2",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_yupt87ou",
+                                          "rondaIndex":  2,
+                                          "partidoIndex":  1,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 3 / 4",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 3 / 4",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_im524ezz",
+                                          "rondaIndex":  2,
+                                          "partidoIndex":  2,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 5 / 6",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 5 / 6",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_jlqvejqa",
+                                          "rondaIndex":  2,
+                                          "partidoIndex":  3,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 7 / 8",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 7 / 8",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      }
+                                  ],
+                                  [
+                                      {
+                                          "id":  "match_mojhh6tz_tv2y8z2h",
+                                          "rondaIndex":  3,
+                                          "partidoIndex":  0,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 1 / 2",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 1 / 2",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      },
+                                      {
+                                          "id":  "match_mojhh6tz_owu7irii",
+                                          "rondaIndex":  3,
+                                          "partidoIndex":  1,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 3 / 4",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 3 / 4",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      }
+                                  ],
+                                  [
+                                      {
+                                          "id":  "match_mojhh6tz_08uk0h5c",
+                                          "rondaIndex":  4,
+                                          "partidoIndex":  0,
+                                          "slotA":  {
+                                                        "sourceLabel":  "Ganador 1 / 2",
+                                                        "equipoId":  null
+                                                    },
+                                          "slotB":  {
+                                                        "sourceLabel":  "Ganador 1 / 2",
+                                                        "equipoId":  null
+                                                    },
+                                          "ganadorEquipoId":  null
+                                      }
+                                  ]
+                              ],
+                   "generadoEn":  null
+               },
+    "admins":  [
+                   {
+                       "email":  "dannaguman@gmail.com",
+                       "status":  "activo",
+                       "ultimoIngresoEn":  "2026-04-29T16:44:21.763Z",
+                       "creadoEn":  "2026-04-29T16:40:20.3657787Z",
+                       "passwordHash":  "$2b$10$nTDgRjEO2hwWy.IEyOl.B.brdm63jspR52klbf9Z3n/oPd37HaVLe"
+                   },
+                   {
+                       "email":  "",
+                       "status":  "pendiente",
+                       "ultimoIngresoEn":  null,
+                       "creadoEn":  "2026-04-29T16:48:54.9207612Z",
+                       "passwordHash":  null
+                   },
+                   {
+                       "email":  "",
+                       "status":  "pendiente",
+                       "ultimoIngresoEn":  null,
+                       "creadoEn":  "2026-04-29T16:48:54.9207612Z",
+                       "passwordHash":  null
+                   },
+                   {
+                       "email":  "",
+                       "status":  "pendiente",
+                       "ultimoIngresoEn":  null,
+                       "creadoEn":  "2026-04-29T16:48:54.9207612Z",
+                       "passwordHash":  null
+                   },
+                   {
+                       "email":  "",
+                       "status":  "pendiente",
+                       "ultimoIngresoEn":  null,
+                       "creadoEn":  "2026-04-29T16:48:54.9207612Z",
+                       "passwordHash":  null
+                   }
+               ]
 }

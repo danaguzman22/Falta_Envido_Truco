@@ -9,7 +9,7 @@ import type {
   RegistrationInput, Torneo, TorneoEstado 
 } from "@/types/tournament";
 
-// 1. Conexión a Supabase usando tus variables del .env.local
+// 1. Configuración de Conexión a Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -25,7 +25,7 @@ function createDefaultTournament(): Torneo {
   };
 }
 
-// 2. Función de lectura con traducción de SQL a TypeScript
+// 2. Mapeo: Traducimos de nombres_sql a nombresTypeScript
 async function fetchFullDatabase(): Promise<AppDatabase> {
   const [
     { data: equiposRaw },
@@ -37,7 +37,6 @@ async function fetchFullDatabase(): Promise<AppDatabase> {
     supabase.from('admins').select('*')
   ]);
 
-  // Traducimos de snake_case (SQL) a camelCase (TS)
   const equipos: Equipo[] = (equiposRaw || []).map(e => ({
     id: e.id,
     nombre: e.nombre,
@@ -75,13 +74,12 @@ export const tournamentRepository = {
   },
 
   async writeDatabase(database: AppDatabase): Promise<void> {
-    // Traducimos de camelCase a snake_case para guardar
     const { error } = await supabase
       .from('torneo')
       .upsert({
         id: database.torneo.id,
         nombre: database.torneo.nombre,
-        total_equipos: database.torneo.totalEquipos,
+        total__equipos: database.torneo.totalEquipos,
         estado: database.torneo.estado,
         rondas: database.torneo.rondas,
         generado_en: database.torneo.generadoEn
@@ -153,6 +151,37 @@ export const tournamentRepository = {
     if (error) throw error;
   },
 
+  async updateTournamentSettings(input: { totalTeams: number; estado: TorneoEstado }): Promise<Torneo> {
+    const database = await this.readDatabase();
+    const nextState = input.estado;
+    const approvedTeams = database.equipos.filter((e) => e.estado === "APROBADO");
+    const nextCapacity = input.totalTeams;
+
+    let updatedRondas = database.torneo.rondas;
+    let generadoEn = database.torneo.generadoEn;
+
+    if (nextState === "TORNEO_EN_CURSO") {
+        if (approvedTeams.length < nextCapacity) throw new Error(`Se necesitan ${nextCapacity} equipos aprobados`);
+        const approvedIds = approvedTeams.slice(0, nextCapacity).map(e => e.id);
+        updatedRondas = assignTeamsToBracket(nextCapacity, approvedIds, createEmptyBracket(nextCapacity));
+        generadoEn = new Date().toISOString();
+    } else if (nextState === "INSCRIPCION_ABIERTA") {
+        updatedRondas = createEmptyBracket(nextCapacity);
+        generadoEn = null;
+    }
+
+    const updatedTournament: Torneo = {
+      ...database.torneo,
+      totalEquipos: nextCapacity,
+      estado: nextState,
+      rondas: updatedRondas,
+      generadoEn,
+    };
+
+    await this.writeDatabase({ ...database, torneo: updatedTournament });
+    return updatedTournament;
+  },
+
   async getPublicBracketView(): Promise<PublicBracketView> {
     const db = await fetchFullDatabase();
     return { torneo: db.torneo, equipos: db.equipos };
@@ -178,9 +207,6 @@ export const adminRepository = {
   },
 
   async registerAdminWithPassword(email: string, password: string): Promise<Admin> {
-    const admin = await this.findAdminByEmail(email);
-    if (!admin) throw new Error("Email no autorizado");
-
     const passwordHash = await hashPassword(password);
     const { data, error } = await supabase
       .from('admins')
@@ -198,8 +224,8 @@ export const adminRepository = {
         passwordHash: data.password_hash,
         status: data.status,
         creadoEn: data.creado_en,
-        ultimoIngresoEn: data.ultimo_ingreso_en
-    };
+        ultimo_ingreso_en: data.ultimo_ingreso_en
+    } as any;
   },
 
   async authenticateAdmin(email: string, password: string): Promise<Admin> {

@@ -294,5 +294,29 @@ export const adminRepository = {
       .from('admins')
       .update({ ultimo_ingreso_en: new Date().toISOString() })
       .ilike('email', email);
+  },
+
+  // ESTA ES LA FUNCIÓN QUE TE PIDE VERCEL AHORA
+  async addAdminToWhitelist(email: string): Promise<Admin> {
+    const { data, error } = await supabase
+      .from('admins')
+      .insert([
+        { 
+          email: email.toLowerCase().trim(), 
+          status: 'pendiente',
+          creado_en: new Date().toISOString()
+        }
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return {
+      email: data.email,
+      passwordHash: data.password_hash,
+      status: data.status,
+      creadoEn: data.creado_en,
+      ultimoIngresoEn: data.ultimo_ingreso_en
+    };
   }
 };

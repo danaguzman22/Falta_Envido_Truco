@@ -3,13 +3,29 @@ import { NOMBRE_TORNEO } from "@/config/torneoConfig";
 import { getAdminEmail, isAdminAuthenticated } from "@/lib/auth";
 import { tournamentRepository } from "@/lib/repository";
 import { AdminPanel } from "@/src/components/admin/admin-panel";
+import Image from "next/image";
 
 export default async function AdminPage() {
   if (!(await isAdminAuthenticated())) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#F5F5DC] px-4 py-10">
-        <div className="grid w-full max-w-5xl gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="rounded-[2rem] bg-[#2D241E] p-8 text-white shadow-2xl">
+      <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+        
+        {/* FONDO: Imagen optimizada con Next.js */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/fondo_administradores.png"
+            alt="Fondo de administración"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Capa de contraste para legibilidad */}
+          <div className="absolute inset-0 bg-stone-950/70 z-10" />
+        </div>
+
+        {/* CONTENIDO: Se mantiene tu estructura original pero con capas superiores */}
+        <div className="relative z-20 grid w-full max-w-5xl gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <section className="rounded-[2rem] bg-[#2D241E]/90 backdrop-blur-sm p-8 text-white shadow-2xl">
             <p className="text-xs uppercase tracking-[0.3em] text-oro-400">Acceso privado</p>
             <h1 className="mt-2 font-serif text-4xl font-semibold">Panel de administración</h1>
             <p className="mt-4 text-sm leading-6 text-stone-300">

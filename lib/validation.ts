@@ -30,3 +30,4 @@ export const adminLoginSchema = z.object({
 });
 
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;
+export type RegistrationSchemaInput = z.infer<typeof registrationSchema>;

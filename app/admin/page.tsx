@@ -1,6 +1,6 @@
 import { AdminLoginForm } from "@/components/admin-login-form";
 import { NOMBRE_TORNEO } from "@/config/torneoConfig";
-import { getAdminUserName, isAdminAuthenticated } from "@/lib/auth";
+import { getAdminEmail, isAdminAuthenticated } from "@/lib/auth";
 import { tournamentRepository } from "@/lib/repository";
 import { AdminPanel } from "@/src/components/admin/admin-panel";
 
@@ -13,7 +13,7 @@ export default async function AdminPage() {
             <p className="text-xs uppercase tracking-[0.3em] text-oro-400">Acceso privado</p>
             <h1 className="mt-2 font-serif text-4xl font-semibold">Panel de administración</h1>
             <p className="mt-4 text-sm leading-6 text-stone-300">
-              Este espacio protege las acciones sobre equipos, aprobación de pago y generación del torneo. Inicia sesión con las credenciales de entorno para continuar.
+              Este espacio protege las acciones sobre equipos, aprobación de pago y generación del torneo. Inicia sesión con tu email autorizado para continuar.
             </p>
             <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-stone-300">
               <div className="text-xs uppercase tracking-[0.2em] text-oro-400/80">Ruta</div>
@@ -28,9 +28,9 @@ export default async function AdminPage() {
   }
 
   const publicView = await tournamentRepository.getPublicBracketView();
-  const adminUser = await getAdminUserName();
+  const adminUser = await getAdminEmail();
 
   return (
-    <AdminPanel adminUser={adminUser ?? process.env.ADMIN_USER ?? "admin"} publicView={publicView} />
+    <AdminPanel adminUser={adminUser ?? "admin"} publicView={publicView} />
   );
 }

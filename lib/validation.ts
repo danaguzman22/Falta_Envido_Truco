@@ -25,9 +25,8 @@ export const registrationSchema = z.object({
 });
 
 export const adminLoginSchema = z.object({
-  username: z.string().trim().min(1, "Usuario requerido"),
-  password: z.string().min(1, "Password requerido"),
+  email: z.string().trim().email("Email inválido").min(1, "Email requerido"),
+  password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
-export type RegistrationSchemaInput = z.infer<typeof registrationSchema>;
 export type AdminLoginInput = z.infer<typeof adminLoginSchema>;

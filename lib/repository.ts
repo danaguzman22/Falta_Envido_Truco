@@ -7,8 +7,9 @@ import { TOTAL_EQUIPOS } from "@/config/torneoConfig";
 import { assignTeamsToBracket, createEmptyBracket } from "@/lib/bracket";
 import { createId } from "@/lib/id";
 import { sanitizeWhatsappForStorage } from "@/lib/whatsapp";
+import { hashPassword, verifyPassword } from "@/lib/password";
 import type { TournamentRepository } from "@/lib/repo-types";
-import type { AppDatabase, Equipo, PublicBracketView, RegistrationInput, Torneo, TorneoEstado } from "@/types/tournament";
+import type { Admin, AppDatabase, Equipo, PublicBracketView, RegistrationInput, Torneo, TorneoEstado } from "@/types/tournament";
 
 const dataDirectory = path.join(process.cwd(), "data");
 const databasePath = path.join(dataDirectory, "tournament-db.json");
@@ -28,6 +29,7 @@ function createDefaultDatabase(): AppDatabase {
   return {
     equipos: [],
     torneo: createDefaultTournament(),
+    admins: [],
   };
 }
 
@@ -75,6 +77,7 @@ async function readRawDatabase(): Promise<AppDatabase> {
   return {
     equipos: Array.isArray(parsed.equipos) ? parsed.equipos.map((team) => normalizeEquipo(team)) : [],
     torneo: parsed.torneo ?? createDefaultTournament(),
+    admins: Array.isArray(parsed.admins) ? parsed.admins : [],
   };
 }
 
@@ -345,5 +348,129 @@ export const tournamentRepository: TournamentRepository = {
       torneo: database.torneo,
       equipos: database.equipos,
     };
+  },
+};
+
+/**
+ * Admin authentication management
+ */
+export const adminRepository = {
+  /**
+   * Find an admin by email in the whitelist
+   */
+  async findAdminByEmail(email: string): Promise<Admin | null> {
+    const database = await tournamentRepository.readDatabase();
+    return database.admins.find((admin) => admin.email.toLowerCase() === email.toLowerCase()) ?? null;
+  },
+
+  /**
+   * Check if an email is in the whitelist (first-time registration)
+   */
+  async isEmailInWhitelist(email: string): Promise<boolean> {
+    const admin = await this.findAdminByEmail(email);
+    return admin !== null;
+  },
+
+  /**
+   * Register an admin with email and password (first-time setup)
+   */
+  async registerAdminWithPassword(email: string, password: string): Promise<Admin> {
+    const database = await tournamentRepository.readDatabase();
+
+    const admin = database.admins.find((a) => a.email.toLowerCase() === email.toLowerCase());
+    if (!admin) {
+      throw new Error("El email no está autorizado");
+    }
+
+    if (admin.status === "activo") {
+      throw new Error("Esta cuenta ya está activa");
+    }
+
+    if (admin.passwordHash !== null) {
+      throw new Error("Esta cuenta ya tiene contraseña");
+    }
+
+    const passwordHash = await hashPassword(password);
+    const updatedAdmin: Admin = {
+      ...admin,
+      passwordHash,
+      status: "activo",
+    };
+
+    const updatedAdmins = database.admins.map((a) => (a.email === admin.email ? updatedAdmin : a));
+
+    await tournamentRepository.writeDatabase({
+      ...database,
+      admins: updatedAdmins,
+    });
+
+    return updatedAdmin;
+  },
+
+  /**
+   * Authenticate admin with email and password
+   */
+  async authenticateAdmin(email: string, password: string): Promise<Admin> {
+    const admin = await this.findAdminByEmail(email);
+
+    if (!admin) {
+      throw new Error("Credenciales inválidas");
+    }
+
+    if (admin.status !== "activo" || !admin.passwordHash) {
+      throw new Error("Credenciales inválidas");
+    }
+
+    const isValid = await verifyPassword(password, admin.passwordHash);
+    if (!isValid) {
+      throw new Error("Credenciales inválidas");
+    }
+
+    return admin;
+  },
+
+  /**
+   * Add an admin to the whitelist
+   */
+  async addAdminToWhitelist(email: string): Promise<Admin> {
+    const database = await tournamentRepository.readDatabase();
+
+    const existingAdmin = database.admins.find((a) => a.email.toLowerCase() === email.toLowerCase());
+    if (existingAdmin) {
+      throw new Error("Este email ya está en la lista de administradores");
+    }
+
+    const newAdmin: Admin = {
+      email: email.toLowerCase(),
+      passwordHash: null,
+      status: "pendiente",
+      creadoEn: new Date().toISOString(),
+      ultimoIngresoEn: null,
+    };
+
+    await tournamentRepository.writeDatabase({
+      ...database,
+      admins: [...database.admins, newAdmin],
+    });
+
+    return newAdmin;
+  },
+
+  /**
+   * Update last login time
+   */
+  async updateLastLogin(email: string): Promise<void> {
+    const database = await tournamentRepository.readDatabase();
+
+    const updatedAdmins = database.admins.map((admin) =>
+      admin.email.toLowerCase() === email.toLowerCase()
+        ? { ...admin, ultimoIngresoEn: new Date().toISOString() }
+        : admin
+    );
+
+    await tournamentRepository.writeDatabase({
+      ...database,
+      admins: updatedAdmins,
+    });
   },
 };

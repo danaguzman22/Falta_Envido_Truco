@@ -46,14 +46,21 @@ export interface Torneo {
   generadoEn: string | null;
 }
 
-export interface UsuarioAdmin {
-  username: string;
-  role: "ADMIN";
+export const adminStatuses = ["pendiente", "activo"] as const;
+export type AdminStatus = (typeof adminStatuses)[number];
+
+export interface Admin {
+  email: string;
+  passwordHash: string | null; // null = primer ingreso, no ha creado contraseña
+  status: AdminStatus;
+  creadoEn: string;
+  ultimoIngresoEn: string | null;
 }
 
 export interface AppDatabase {
   equipos: Equipo[];
   torneo: Torneo;
+  admins: Admin[];
 }
 
 export interface RegistrationInput {

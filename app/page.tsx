@@ -6,13 +6,32 @@ import { RegistrationSection } from "@/components/landing/registration-section";
 import { RulesSection } from "@/components/landing/rules-section";
 import { tournamentRepository } from "@/lib/repository";
 
+// Función auxiliar para identificar el tipo de equipo (la misma que usamos en el admin)
+function getTeamType(team: any) {
+  return team.tipoEquipo ?? (team.jugadores.length >= 3 ? "EQUIPO_3" : "PAREJA");
+}
+
 export default async function Home() {
   const publicView = await tournamentRepository.getPublicBracketView();
+
+  // 1. Calculamos los aprobados por categoría para el Hero
+  const approvedPairs = publicView.equipos.filter(
+    (e) => e.estado === "APROBADO" && getTeamType(e) === "PAREJA"
+  ).length;
+
+  const approvedTrios = publicView.equipos.filter(
+    (e) => e.estado === "APROBADO" && getTeamType(e) === "EQUIPO_3"
+  ).length;
+
+  // 2. El total general de inscriptos
+  const totalTeamsCount = publicView.equipos.length;
+
   return (
     <main className="min-h-screen bg-tierra-50">
       <HeroSection
-        approvedTeams={publicView.equipos.filter((equipo) => equipo.estado === "APROBADO").length}
-        totalTeams={publicView.equipos.length}
+        approvedPairs={approvedPairs}
+        approvedTrios={approvedTrios}
+        totalTeams={totalTeamsCount}
       />
       <InfoSection />
       <RulesSection />

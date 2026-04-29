@@ -8,6 +8,8 @@
   --oro: #d4af37;
   --footer: #2d241e;
   --offwhite: #f5f1e8;
+  /* Agregamos esto aquí */
+  scroll-behavior: smooth;
 }
 
 body {

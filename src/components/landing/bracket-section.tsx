@@ -11,7 +11,8 @@ interface BracketSectionProps extends PublicBracketView {}
 export function BracketSection({ torneo, equipos }: BracketSectionProps) {
   return (
     <AnimatedSection delay={0.8}>
-      <section className="px-4 py-16 md:py-24 bg-tierra-50">
+      {/* Agregamos el id="cuadro" aquí */}
+      <section id="bracket" className="px-4 py-16 md:py-24 bg-tierra-50">
         <div className="mx-auto max-w-full">
           <BracketBoard torneo={torneo} equipos={equipos} title="Cuadro Eliminatorio" />
         </div>

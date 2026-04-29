@@ -2,7 +2,7 @@ const BASE_TOTAL_EQUIPOS = 32;
 
 export const TOTAL_EQUIPOS = BASE_TOTAL_EQUIPOS;
 export const NOMBRE_TORNEO = "Falta Envido y Truco";
-export const NOMBRE_UNIVERSIDAD = "UTN";
+export const NOMBRE_UNIVERSIDAD = "UTN-FRSR";
 export const NOMBRE_TORNEO_CORTO = "Falta Envido y Truco - UTN";
 export const ORGANIZATION_WHATSAPP_NUMBER = "5492604417975";
 

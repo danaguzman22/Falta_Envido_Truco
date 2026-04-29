@@ -98,13 +98,31 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
   const [savingTeamId, setSavingTeamId] = useState<string | null>(null);
   const [editMessage, setEditMessage] = useState<string | null>(null);
 
+// 1. Totales generales
   const totalTeams = publicView.equipos.length;
-  const approvedTeams = publicView.equipos.filter((equipo) => equipo.estado === "APROBADO").length;
   const pendingTeams = publicView.equipos.filter((equipo) => equipo.estado === "PENDIENTE").length;
+
+  // 2. Filtramos aprobados por categoría
+  const approvedPairs = publicView.equipos.filter(
+    (e) => e.estado === "APROBADO" && getTeamType(e) === "PAREJA"
+  ).length;
+
+  const approvedTrios = publicView.equipos.filter(
+    (e) => e.estado === "APROBADO" && getTeamType(e) === "EQUIPO_3"
+  ).length;
+
+  // 3. Definimos el cupo máximo por categoría (32)
+  const CUPO_MAX_CATEGORIA = 32;
+
+  // 4. Listas filtradas para las pestañas
   const pairTeams = publicView.equipos.filter((equipo) => getTeamType(equipo) === "PAREJA");
   const trioTeams = publicView.equipos.filter((equipo) => getTeamType(equipo) === "EQUIPO_3");
-  const tournamentCapacity = publicView.torneo.totalEquipos;
-  const canGenerate = approvedTeams >= tournamentCapacity && publicView.torneo.estado !== "TORNEO_EN_CURSO";
+
+  // 5. Lógica de generación condicionada a la pestaña activa
+  const tournamentCapacity = CUPO_MAX_CATEGORIA; 
+  const canGenerate = (activeTab === "parejas" && approvedPairs >= CUPO_MAX_CATEGORIA) || 
+                      (activeTab === "equipo3" && approvedTrios >= CUPO_MAX_CATEGORIA);
+                      
   const canDeleteTeams = publicView.torneo.estado === "INSCRIPCION_ABIERTA";
 
   const tabClass = (id: typeof activeTab) =>
@@ -271,9 +289,9 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
       <main className="mx-auto max-w-7xl p-8">
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
           <StatCard title="Total Inscritos" value={totalTeams} icon={<Users className="text-blue-500" />} />
-          <StatCard title="Aprobados" value={approvedTeams} icon={<CheckCircle className="text-green-500" />} />
+          <StatCard title="Cupo Parejas" value={`${approvedPairs} / ${CUPO_MAX_CATEGORIA}`} icon={<CheckCircle className="text-green-500" />} />
+          <StatCard title="Cupo Equipo 3" value={`${approvedTrios} / ${CUPO_MAX_CATEGORIA}`} icon={<Trophy className="text-oro-500" />} />
           <StatCard title="Pendientes" value={pendingTeams} icon={<Clock className="text-yellow-500" />} />
-          <StatCard title="Cupo Requerido" value={tournamentCapacity} icon={<Trophy className="text-oro-500" />} />
         </div>
 
         <nav className="flex flex-wrap gap-1 border-b-2 border-[#8B735B]">
@@ -502,7 +520,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                 <div className="text-sm text-stone-600">
                   {canGenerate
                     ? "Ya hay suficientes equipos aprobados para generar el torneo."
-                    : `Faltan ${Math.max(0, tournamentCapacity - approvedTeams)} equipos aprobados para activar el bracket.`}
+                  : `Faltan equipos aprobados en esta categoría para activar el bracket.`}  
                 </div>
 
                 <form action="/api/admin/generar-torneo" method="post">

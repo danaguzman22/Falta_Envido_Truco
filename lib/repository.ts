@@ -9,7 +9,20 @@ import type {
   RegistrationInput, Torneo, TorneoEstado 
 } from "@/types/tournament";
 
-// 1. Configuración de Conexión a Supabase
+// 1. Definición de la Interfaz (Contrato)
+export interface TournamentRepository {
+  readDatabase(): Promise<AppDatabase>;
+  writeDatabase(database: AppDatabase): Promise<void>;
+  createRegistration(input: RegistrationInput): Promise<Equipo>;
+  approveTeam(teamId: string): Promise<Equipo>;
+  updateTournamentSettings(input: { totalTeams: number; estado: TorneoEstado }): Promise<Torneo>;
+  updateTeam(teamId: string, input: RegistrationInput): Promise<Equipo>;
+  deleteTeam(teamId: string): Promise<void>;
+  generateTournament(): Promise<Torneo>;
+  getPublicBracketView(): Promise<PublicBracketView>;
+}
+
+// 2. Configuración de Conexión a Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -25,7 +38,6 @@ function createDefaultTournament(): Torneo {
   };
 }
 
-// 2. Mapeo: Traducimos de nombres_sql a nombresTypeScript
 async function fetchFullDatabase(): Promise<AppDatabase> {
   const [
     { data: equiposRaw },
@@ -68,7 +80,8 @@ async function fetchFullDatabase(): Promise<AppDatabase> {
   return { equipos, torneo, admins };
 }
 
-export const tournamentRepository = {
+// 3. Implementación del Repositorio
+export const tournamentRepository: TournamentRepository = {
   async readDatabase(): Promise<AppDatabase> {
     return await fetchFullDatabase();
   },
@@ -79,7 +92,7 @@ export const tournamentRepository = {
       .upsert({
         id: database.torneo.id,
         nombre: database.torneo.nombre,
-        total__equipos: database.torneo.totalEquipos,
+        total_equipos: database.torneo.totalEquipos,
         estado: database.torneo.estado,
         rondas: database.torneo.rondas,
         generado_en: database.torneo.generadoEn
@@ -146,6 +159,38 @@ export const tournamentRepository = {
     };
   },
 
+  async updateTeam(teamId: string, input: RegistrationInput): Promise<Equipo> {
+    const { data, error } = await supabase
+      .from('equipos')
+      .update({
+        nombre: input.nombreEquipo.trim(),
+        tipo_equipo: input.tipoEquipo,
+        jugadores: [
+          { id: createId("player"), nombre: input.jugador1.trim() },
+          { id: createId("player"), nombre: input.jugador2.trim() },
+          ...(input.tipoEquipo === "EQUIPO_3" && input.jugador3?.trim()
+            ? [{ id: createId("player"), nombre: input.jugador3.trim() }]
+            : []),
+        ],
+        whatsapp: sanitizeWhatsappForStorage(input.whatsapp),
+      })
+      .eq('id', teamId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return {
+      id: data.id,
+      nombre: data.nombre,
+      tipoEquipo: data.tipo_equipo,
+      jugadores: data.jugadores,
+      whatsapp: data.whatsapp,
+      estado: data.estado,
+      creadoEn: data.creado_en,
+      aprobadoEn: data.aprobado_en
+    };
+  },
+
   async deleteTeam(teamId: string): Promise<void> {
     const { error } = await supabase.from('equipos').delete().eq('id', teamId);
     if (error) throw error;
@@ -153,29 +198,33 @@ export const tournamentRepository = {
 
   async updateTournamentSettings(input: { totalTeams: number; estado: TorneoEstado }): Promise<Torneo> {
     const database = await this.readDatabase();
-    const nextState = input.estado;
+    const updatedTournament: Torneo = {
+      ...database.torneo,
+      totalEquipos: input.totalTeams,
+      estado: input.estado,
+    };
+
+    await this.writeDatabase({ ...database, torneo: updatedTournament });
+    return updatedTournament;
+  },
+
+  async generateTournament(): Promise<Torneo> {
+    const database = await this.readDatabase();
     const approvedTeams = database.equipos.filter((e) => e.estado === "APROBADO");
-    const nextCapacity = input.totalTeams;
+    const capacity = database.torneo.totalEquipos;
 
-    let updatedRondas = database.torneo.rondas;
-    let generadoEn = database.torneo.generadoEn;
-
-    if (nextState === "TORNEO_EN_CURSO") {
-        if (approvedTeams.length < nextCapacity) throw new Error(`Se necesitan ${nextCapacity} equipos aprobados`);
-        const approvedIds = approvedTeams.slice(0, nextCapacity).map(e => e.id);
-        updatedRondas = assignTeamsToBracket(nextCapacity, approvedIds, createEmptyBracket(nextCapacity));
-        generadoEn = new Date().toISOString();
-    } else if (nextState === "INSCRIPCION_ABIERTA") {
-        updatedRondas = createEmptyBracket(nextCapacity);
-        generadoEn = null;
+    if (approvedTeams.length < capacity) {
+      throw new Error(`Se necesitan al menos ${capacity} equipos aprobados.`);
     }
+
+    const teamIds = approvedTeams.slice(0, capacity).map(e => e.id);
+    const generatedRondas = assignTeamsToBracket(capacity, teamIds, createEmptyBracket(capacity));
 
     const updatedTournament: Torneo = {
       ...database.torneo,
-      totalEquipos: nextCapacity,
-      estado: nextState,
-      rondas: updatedRondas,
-      generadoEn,
+      estado: "TORNEO_EN_CURSO",
+      rondas: generatedRondas,
+      generadoEn: new Date().toISOString(),
     };
 
     await this.writeDatabase({ ...database, torneo: updatedTournament });
@@ -224,7 +273,7 @@ export const adminRepository = {
         passwordHash: data.password_hash,
         status: data.status,
         creadoEn: data.creado_en,
-        ultimo_ingreso_en: data.ultimo_ingreso_en
+        ultimoIngresoEn: data.ultimo_ingreso_en
     } as any;
   },
 

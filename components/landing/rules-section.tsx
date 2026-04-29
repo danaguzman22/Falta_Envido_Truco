@@ -1,0 +1,1 @@
+export { RulesSection } from "@/src/components/landing/rules-section";

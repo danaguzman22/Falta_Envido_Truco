@@ -1,0 +1,83 @@
+import Image from "next/image";
+import { Calendar, Clock, Users, Trophy } from "lucide-react";
+import { NOMBRE_TORNEO, NOMBRE_UNIVERSIDAD, TOTAL_EQUIPOS } from "@/config/torneoConfig";
+
+interface HeroSectionProps {
+  approvedTeams: number;
+  totalTeams: number;
+}
+
+/**
+ * Sección Hero de la página de inicio
+ * Muestra el título, descripción y estadísticas principales del torneo
+ */
+export function HeroSection({ approvedTeams, totalTeams }: HeroSectionProps) {
+  return (
+    <section className="relative flex min-h-[600px] w-full items-center overflow-hidden">
+      {/* IMAGEN DE FONDO (fondo_titulo.png) */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="/images/fondo_titulo.png"
+          alt="Fondo Torneo de Truco"
+          fill
+          priority
+          className="object-cover"
+        />
+        {/* Capa de oscurecimiento para que el texto sea legible */}
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-20">
+        <div className="flex flex-col items-center justify-center">
+          {/* Contenido de texto centrado sobre la imagen */}
+          <div className="text-center text-white">
+            <p className="mb-3 text-sm uppercase tracking-widest text-oro-400 font-bold drop-shadow-md">
+              Torneo Universitario
+            </p>
+
+            <h1 className="mb-6 font-serif text-5xl font-bold leading-tight text-white drop-shadow-2xl md:text-6xl lg:text-8xl">
+              {NOMBRE_TORNEO}
+            </h1>
+
+            <p className="mx-auto mb-8 max-w-3xl text-lg leading-relaxed text-slate-100 font-medium drop-shadow-md md:text-xl">
+              Plataforma de inscripción, validación y generación de llave eliminatoria para {NOMBRE_UNIVERSIDAD}. 
+              Únete a este torneo tradicional de truco donde la estrategia y el conocimiento se encuentran.
+            </p>
+
+            <div className="flex flex-col items-center justify-center gap-6 pt-6 sm:flex-row">
+              <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
+                <Calendar className="w-5 h-5 text-oro-400" />
+                <span className="font-medium">Próximamente</span>
+              </div>
+              <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
+                <Users className="w-5 h-5 text-oro-400" />
+                <span className="font-medium">{TOTAL_EQUIPOS} Equipos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Cards (ahora flotan sobre el fondo con más desenfoque) */}
+        <div className="mt-20 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="rounded-2xl border border-white/10 bg-black/30 p-6 shadow-2xl backdrop-blur-xl transition-transform hover:scale-105">
+            <Users className="mb-3 h-8 w-8 text-oro-400" />
+            <div className="text-4xl font-bold text-white">{totalTeams}</div>
+            <div className="mt-1 text-sm uppercase tracking-wider text-slate-300">Equipos Registrados</div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-black/30 p-6 shadow-2xl backdrop-blur-xl transition-transform hover:scale-105">
+            <Trophy className="mb-3 h-8 w-8 text-oro-400" />
+            <div className="text-4xl font-bold text-white">{approvedTeams}</div>
+            <div className="mt-1 text-sm uppercase tracking-wider text-slate-300">Equipos Aprobados</div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-black/30 p-6 shadow-2xl backdrop-blur-xl transition-transform hover:scale-105">
+            <Clock className="mb-3 h-8 w-8 text-oro-400" />
+            <div className="text-4xl font-bold text-white">{approvedTeams}/{TOTAL_EQUIPOS}</div>
+            <div className="mt-1 text-sm uppercase tracking-wider text-slate-300">Cupo Disponible</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

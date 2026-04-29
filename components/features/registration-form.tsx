@@ -1,0 +1,1 @@
+export { RegistrationForm } from "@/src/components/features/registration-form";

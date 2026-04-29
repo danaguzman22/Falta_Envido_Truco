@@ -1,0 +1,1 @@
+export { BracketSection } from "@/src/components/landing/bracket-section";

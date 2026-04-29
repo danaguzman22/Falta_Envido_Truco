@@ -1,0 +1,1 @@
+export { InfoSection } from "@/src/components/landing/info-section";

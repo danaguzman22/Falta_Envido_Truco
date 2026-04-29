@@ -1,4 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Falta Envido y Truco - UTN
+
+Plataforma web en Next.js App Router para gestionar inscripcion, aprobacion y generacion del bracket del torneo de truco.
+
+## Stack
+
+- Next.js 16 con App Router
+- TypeScript en modo estricto
+- Tailwind CSS
+- Zod + React Hook Form
+- Persistencia JSON local, lista para migrar a Prisma + PostgreSQL
+
+## Variables de entorno
+
+Usa `.env.local` con:
+
+- `ADMIN_USER`
+- `ADMIN_PASS`
+- `ORGANIZATION_WHATSAPP_NUMBER`
+
+## Flujo principal
+
+- La landing publica permite inscribir equipos con validacion de Zod.
+- La API de inscripcion guarda el equipo como `PENDIENTE` y devuelve el enlace de WhatsApp de la organizacion.
+- El panel `/admin` inicia sesion con credenciales de entorno, aprueba pagos y genera el torneo cuando hay suficientes equipos aprobados.
+
+## Desarrollo local
+
+1. Ejecuta `npm install` si aun faltan dependencias.
+2. Ejecuta `npm run dev`.
+3. Abre `http://localhost:3000`.
+
+## Notas tecnicas
+
+- El bracket responde al valor centralizado `TOTAL_EQUIPOS` en `config/torneoConfig.ts`.
+- El cuadro se genera en una llave de eliminacion directa y se puede extender para 32 equipos cambiando solo la configuracion y la semilla de datos.
+- La autenticacion de admin usa una cookie simple, suficiente para esta version inicial.This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 

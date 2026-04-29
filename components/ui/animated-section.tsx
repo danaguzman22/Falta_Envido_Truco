@@ -1,0 +1,1 @@
+export { AnimatedSection } from "@/src/components/ui/animated-section";

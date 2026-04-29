@@ -1,0 +1,1 @@
+export { RegistrationSection } from "@/src/components/landing/registration-section";

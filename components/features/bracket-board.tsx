@@ -1,0 +1,1 @@
+export { BracketBoard } from "@/src/components/features/bracket-board";

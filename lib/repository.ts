@@ -1,18 +1,18 @@
-import "server-only";
-
-import fs from "fs/promises";
-import path from "path";
-
+import { createClient } from '@supabase/supabase-js';
 import { TOTAL_EQUIPOS } from "@/config/torneoConfig";
-import { assignTeamsToBracket, createEmptyBracket } from "@/lib/bracket";
+import { createEmptyBracket, assignTeamsToBracket } from "@/lib/bracket";
 import { createId } from "@/lib/id";
 import { sanitizeWhatsappForStorage } from "@/lib/whatsapp";
 import { hashPassword, verifyPassword } from "@/lib/password";
-import type { TournamentRepository } from "@/lib/repo-types";
-import type { Admin, AppDatabase, Equipo, PublicBracketView, RegistrationInput, Torneo, TorneoEstado } from "@/types/tournament";
+import type { 
+  Admin, AppDatabase, Equipo, PublicBracketView, 
+  RegistrationInput, Torneo, TorneoEstado 
+} from "@/types/tournament";
 
-const dataDirectory = path.join(process.cwd(), "data");
-const databasePath = path.join(dataDirectory, "tournament-db.json");
+// 1. Conexión a Supabase usando tus variables del .env.local
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 function createDefaultTournament(): Torneo {
   return {
@@ -25,109 +25,78 @@ function createDefaultTournament(): Torneo {
   };
 }
 
-function createDefaultDatabase(): AppDatabase {
-  return {
-    equipos: [],
-    torneo: createDefaultTournament(),
-    admins: [],
-  };
+// 2. Función de lectura con traducción de SQL a TypeScript
+async function fetchFullDatabase(): Promise<AppDatabase> {
+  const [
+    { data: equiposRaw },
+    { data: torneoRaw },
+    { data: adminsRaw }
+  ] = await Promise.all([
+    supabase.from('equipos').select('*').order('creado_en', { ascending: false }),
+    supabase.from('torneo').select('*').eq('id', 'torneo-utn-2026').single(),
+    supabase.from('admins').select('*')
+  ]);
+
+  // Traducimos de snake_case (SQL) a camelCase (TS)
+  const equipos: Equipo[] = (equiposRaw || []).map(e => ({
+    id: e.id,
+    nombre: e.nombre,
+    tipoEquipo: e.tipo_equipo,
+    jugadores: e.jugadores,
+    whatsapp: e.whatsapp,
+    estado: e.estado,
+    creadoEn: e.creado_en,
+    aprobadoEn: e.aprobado_en
+  }));
+
+  const admins: Admin[] = (adminsRaw || []).map(a => ({
+    email: a.email,
+    passwordHash: a.password_hash,
+    status: a.status,
+    creadoEn: a.creado_en,
+    ultimoIngresoEn: a.ultimo_ingreso_en
+  }));
+
+  const torneo: Torneo = torneoRaw ? {
+    id: torneoRaw.id,
+    nombre: torneoRaw.nombre,
+    totalEquipos: torneoRaw.total_equipos,
+    estado: torneoRaw.estado,
+    rondas: torneoRaw.rondas,
+    generadoEn: torneoRaw.generado_en
+  } : createDefaultTournament();
+
+  return { equipos, torneo, admins };
 }
 
-function normalizeEquipo(team: Partial<Equipo> & { jugadores?: Array<{ id?: string; nombre?: string }> }): Equipo {
-  const normalizedPlayers = Array.isArray(team.jugadores)
-    ? team.jugadores
-        .slice(0, team.tipoEquipo === "EQUIPO_3" ? 3 : 2)
-        .map((player, index) => {
-          const normalizedPlayer = player as { id?: string; nombre?: string };
-
-          return {
-            id: normalizedPlayer.id ?? createId(`player${index + 1}`),
-            nombre: (normalizedPlayer.nombre ?? "").trim(),
-          };
-        })
-    : [];
-
-  return {
-    id: team.id ?? createId("team"),
-    nombre: (team.nombre ?? "").trim(),
-    tipoEquipo: team.tipoEquipo ?? (normalizedPlayers.length >= 3 ? "EQUIPO_3" : "PAREJA"),
-    jugadores: normalizedPlayers,
-    whatsapp: (team.whatsapp ?? "").trim(),
-    estado: team.estado ?? "PENDIENTE",
-    creadoEn: team.creadoEn ?? new Date().toISOString(),
-    aprobadoEn: team.aprobadoEn ?? null,
-  };
-}
-
-async function ensureDatabaseFileExists(): Promise<void> {
-  await fs.mkdir(dataDirectory, { recursive: true });
-
-  try {
-    await fs.access(databasePath);
-  } catch {
-    await fs.writeFile(databasePath, `${JSON.stringify(createDefaultDatabase(), null, 2)}\n`, "utf8");
-  }
-}
-
-async function readRawDatabase(): Promise<AppDatabase> {
-  await ensureDatabaseFileExists();
-  const fileContents = await fs.readFile(databasePath, "utf8");
-  const parsed = JSON.parse(fileContents) as Partial<AppDatabase>;
-
-  return {
-    equipos: Array.isArray(parsed.equipos) ? parsed.equipos.map((team) => normalizeEquipo(team)) : [],
-    torneo: parsed.torneo ?? createDefaultTournament(),
-    admins: Array.isArray(parsed.admins) ? parsed.admins : [],
-  };
-}
-
-async function persistDatabase(database: AppDatabase): Promise<void> {
-  await ensureDatabaseFileExists();
-  await fs.writeFile(databasePath, `${JSON.stringify(database, null, 2)}\n`, "utf8");
-}
-
-function validateTournament(database: AppDatabase): AppDatabase {
-  if (!database.torneo.rondas.length) {
-    return {
-      ...database,
-      torneo: {
-        ...database.torneo,
-        rondas: createEmptyBracket(database.torneo.totalEquipos),
-      },
-    };
-  }
-
-  return database;
-}
-
-export const tournamentRepository: TournamentRepository = {
+export const tournamentRepository = {
   async readDatabase(): Promise<AppDatabase> {
-    const database = await readRawDatabase();
-    return validateTournament(database);
+    return await fetchFullDatabase();
   },
 
   async writeDatabase(database: AppDatabase): Promise<void> {
-    await persistDatabase(database);
+    // Traducimos de camelCase a snake_case para guardar
+    const { error } = await supabase
+      .from('torneo')
+      .upsert({
+        id: database.torneo.id,
+        nombre: database.torneo.nombre,
+        total_equipos: database.torneo.totalEquipos,
+        estado: database.torneo.estado,
+        rondas: database.torneo.rondas,
+        generado_en: database.torneo.generadoEn
+      });
+    if (error) throw error;
   },
 
   async createRegistration(input: RegistrationInput): Promise<Equipo> {
-    const database = await this.readDatabase();
+    const db = await this.readDatabase();
+    if (db.torneo.estado !== "INSCRIPCION_ABIERTA") throw new Error("Inscripciones cerradas");
 
-    if (database.torneo.estado !== "INSCRIPCION_ABIERTA") {
-      throw new Error("Las inscripciones ya estan cerradas");
-    }
-
-    const normalizedEquipoName = input.nombreEquipo.trim();
-    const duplicateTeam = database.equipos.find((equipo) => equipo.nombre.toLowerCase() === normalizedEquipoName.toLowerCase());
-
-    if (duplicateTeam) {
-      throw new Error("Ya existe un equipo con ese nombre");
-    }
-
-    const newEquipo: Equipo = {
+    const newEquipoSQL = {
       id: createId("team"),
-      nombre: normalizedEquipoName,
-      tipoEquipo: input.tipoEquipo,
+      nombre: input.nombreEquipo.trim(),
+      tipo_equipo: input.tipoEquipo,
       jugadores: [
         { id: createId("player"), nombre: input.jugador1.trim() },
         { id: createId("player"), nombre: input.jugador2.trim() },
@@ -137,340 +106,118 @@ export const tournamentRepository: TournamentRepository = {
       ],
       whatsapp: sanitizeWhatsappForStorage(input.whatsapp),
       estado: "PENDIENTE",
-      creadoEn: new Date().toISOString(),
-      aprobadoEn: null,
+      creado_en: new Date().toISOString()
     };
 
-    const nextDatabase: AppDatabase = {
-      ...database,
-      equipos: [newEquipo, ...database.equipos],
-    };
+    const { error } = await supabase.from('equipos').insert([newEquipoSQL]);
+    if (error) throw error;
 
-    await persistDatabase(nextDatabase);
-    return newEquipo;
+    return {
+      id: newEquipoSQL.id,
+      nombre: newEquipoSQL.nombre,
+      tipoEquipo: newEquipoSQL.tipo_equipo,
+      jugadores: newEquipoSQL.jugadores,
+      whatsapp: newEquipoSQL.whatsapp,
+      estado: newEquipoSQL.estado as any,
+      creadoEn: newEquipoSQL.creado_en,
+      aprobadoEn: null
+    };
   },
 
   async approveTeam(teamId: string): Promise<Equipo> {
-    const database = await this.readDatabase();
-    const targetTeamIndex = database.equipos.findIndex((equipo) => equipo.id === teamId);
+    const { data, error } = await supabase
+      .from('equipos')
+      .update({ 
+        estado: "APROBADO", 
+        aprobado_en: new Date().toISOString() 
+      })
+      .eq('id', teamId)
+      .select()
+      .single();
 
-    if (targetTeamIndex < 0) {
-      throw new Error("Equipo no encontrado");
-    }
-
-    const targetTeam = database.equipos[targetTeamIndex];
-    const approvedTeam: Equipo = {
-      ...targetTeam,
-      estado: "APROBADO",
-      aprobadoEn: new Date().toISOString(),
+    if (error) throw error;
+    return {
+        id: data.id,
+        nombre: data.nombre,
+        tipoEquipo: data.tipo_equipo,
+        jugadores: data.jugadores,
+        whatsapp: data.whatsapp,
+        estado: data.estado,
+        creadoEn: data.creado_en,
+        aprobadoEn: data.aprobado_en
     };
-
-    const nextTeams = [...database.equipos];
-    nextTeams[targetTeamIndex] = approvedTeam;
-
-    await persistDatabase({
-      ...database,
-      equipos: nextTeams,
-    });
-
-    return approvedTeam;
-  },
-
-  async updateTeam(
-    teamId: string,
-    input: RegistrationInput
-  ): Promise<Equipo> {
-    const database = await this.readDatabase();
-    const targetTeamIndex = database.equipos.findIndex((equipo) => equipo.id === teamId);
-
-    if (targetTeamIndex < 0) {
-      throw new Error("Equipo no encontrado");
-    }
-
-    const normalizedEquipoName = input.nombreEquipo.trim();
-    if (!normalizedEquipoName) {
-      throw new Error("El nombre del equipo es obligatorio");
-    }
-
-    const duplicateTeam = database.equipos.find(
-      (equipo) => equipo.id !== teamId && equipo.nombre.toLowerCase() === normalizedEquipoName.toLowerCase()
-    );
-
-    if (duplicateTeam) {
-      throw new Error("Ya existe un equipo con ese nombre");
-    }
-
-    const targetTeam = database.equipos[targetTeamIndex];
-    const updatedTeam: Equipo = {
-      ...targetTeam,
-      nombre: normalizedEquipoName,
-      tipoEquipo: input.tipoEquipo,
-      jugadores: [
-        { ...targetTeam.jugadores[0], nombre: input.jugador1.trim() },
-        { ...targetTeam.jugadores[1], nombre: input.jugador2.trim() },
-        ...(input.tipoEquipo === "EQUIPO_3"
-          ? [
-              {
-                id: targetTeam.jugadores[2]?.id ?? createId("player"),
-                nombre: input.jugador3?.trim() ?? targetTeam.jugadores[2]?.nombre ?? "",
-              },
-            ]
-          : []),
-      ],
-      whatsapp: sanitizeWhatsappForStorage(input.whatsapp),
-    };
-
-    const nextTeams = [...database.equipos];
-    nextTeams[targetTeamIndex] = updatedTeam;
-
-    await persistDatabase({
-      ...database,
-      equipos: nextTeams,
-    });
-
-    return updatedTeam;
   },
 
   async deleteTeam(teamId: string): Promise<void> {
-    const database = await this.readDatabase();
-
-    if (database.torneo.estado !== "INSCRIPCION_ABIERTA") {
-      throw new Error("Solo se pueden eliminar equipos con las inscripciones abiertas");
-    }
-
-    const nextTeams = database.equipos.filter((equipo) => equipo.id !== teamId);
-
-    if (nextTeams.length === database.equipos.length) {
-      throw new Error("Equipo no encontrado");
-    }
-
-    await persistDatabase({
-      ...database,
-      equipos: nextTeams,
-    });
-  },
-
-  async updateTournamentSettings(input: { totalTeams: number; estado: TorneoEstado }): Promise<Torneo> {
-    const database = await this.readDatabase();
-    const nextState = input.estado;
-
-    const approvedTeams = database.equipos.filter((equipo) => equipo.estado === "APROBADO");
-    const nextCapacity = input.totalTeams;
-
-    if (database.torneo.estado !== "INSCRIPCION_ABIERTA" && nextCapacity !== database.torneo.totalEquipos) {
-      throw new Error("El cupo solo se puede modificar con las inscripciones abiertas");
-    }
-
-    if (nextState === "INSCRIPCION_ABIERTA") {
-      const updatedTournament: Torneo = {
-        ...database.torneo,
-        totalEquipos: nextCapacity,
-        estado: nextState,
-        rondas: createEmptyBracket(nextCapacity),
-        generadoEn: null,
-      };
-
-      await persistDatabase({
-        ...database,
-        torneo: updatedTournament,
-      });
-
-      return updatedTournament;
-    }
-
-    if (nextState === "TORNEO_EN_CURSO" && approvedTeams.length < nextCapacity) {
-      throw new Error(`Se necesitan al menos ${nextCapacity} equipos aprobados`);
-    }
-
-    const approvedTeamIds = approvedTeams.slice(0, nextCapacity).map((equipo) => equipo.id);
-    const currentRounds =
-      database.torneo.rondas.length > 0 ? database.torneo.rondas : createEmptyBracket(nextCapacity);
-    const bracketRounds =
-      nextState === "TORNEO_EN_CURSO"
-        ? assignTeamsToBracket(nextCapacity, approvedTeamIds, currentRounds)
-        : currentRounds;
-
-    if (approvedTeams.length > nextCapacity) {
-      throw new Error("No se puede reducir el cupo por debajo de la cantidad de equipos aprobados");
-    }
-
-    const updatedTournament: Torneo = {
-      ...database.torneo,
-      totalEquipos: nextCapacity,
-      estado: nextState,
-      rondas: bracketRounds,
-      generadoEn: nextState === "TORNEO_EN_CURSO" ? new Date().toISOString() : database.torneo.generadoEn,
-    };
-
-    await persistDatabase({
-      ...database,
-      torneo: updatedTournament,
-    });
-
-    return updatedTournament;
-  },
-
-  async generateTournament(): Promise<Torneo> {
-    const database = await this.readDatabase();
-
-    if (database.torneo.estado === "TORNEO_EN_CURSO") {
-      throw new Error("El torneo ya fue generado");
-    }
-
-    const approvedTeams = database.equipos.filter((equipo) => equipo.estado === "APROBADO");
-
-    if (approvedTeams.length < database.torneo.totalEquipos) {
-      throw new Error(`Se necesitan al menos ${database.torneo.totalEquipos} equipos aprobados`);
-    }
-
-    const approvedTeamIds = approvedTeams.slice(0, database.torneo.totalEquipos).map((equipo) => equipo.id);
-    const bracketRounds = assignTeamsToBracket(database.torneo.totalEquipos, approvedTeamIds, database.torneo.rondas);
-
-    const updatedTournament: Torneo = {
-      ...database.torneo,
-      estado: "TORNEO_EN_CURSO",
-      rondas: bracketRounds,
-      generadoEn: new Date().toISOString(),
-    };
-
-    await persistDatabase({
-      ...database,
-      torneo: updatedTournament,
-    });
-
-    return updatedTournament;
+    const { error } = await supabase.from('equipos').delete().eq('id', teamId);
+    if (error) throw error;
   },
 
   async getPublicBracketView(): Promise<PublicBracketView> {
-    const database = await this.readDatabase();
-
-    return {
-      torneo: database.torneo,
-      equipos: database.equipos,
-    };
+    const db = await fetchFullDatabase();
+    return { torneo: db.torneo, equipos: db.equipos };
   },
 };
 
-/**
- * Admin authentication management
- */
 export const adminRepository = {
-  /**
-   * Find an admin by email in the whitelist
-   */
   async findAdminByEmail(email: string): Promise<Admin | null> {
-    const database = await tournamentRepository.readDatabase();
-    return database.admins.find((admin) => admin.email.toLowerCase() === email.toLowerCase()) ?? null;
+    const { data } = await supabase
+      .from('admins')
+      .select('*')
+      .ilike('email', email)
+      .single();
+    
+    if (!data) return null;
+    return {
+        email: data.email,
+        passwordHash: data.password_hash,
+        status: data.status,
+        creadoEn: data.creado_en,
+        ultimoIngresoEn: data.ultimo_ingreso_en
+    };
   },
 
-  /**
-   * Check if an email is in the whitelist (first-time registration)
-   */
-  async isEmailInWhitelist(email: string): Promise<boolean> {
-    const admin = await this.findAdminByEmail(email);
-    return admin !== null;
-  },
-
-  /**
-   * Register an admin with email and password (first-time setup)
-   */
   async registerAdminWithPassword(email: string, password: string): Promise<Admin> {
-    const database = await tournamentRepository.readDatabase();
-
-    const admin = database.admins.find((a) => a.email.toLowerCase() === email.toLowerCase());
-    if (!admin) {
-      throw new Error("El email no está autorizado");
-    }
-
-    if (admin.status === "activo") {
-      throw new Error("Esta cuenta ya está activa");
-    }
-
-    if (admin.passwordHash !== null) {
-      throw new Error("Esta cuenta ya tiene contraseña");
-    }
+    const admin = await this.findAdminByEmail(email);
+    if (!admin) throw new Error("Email no autorizado");
 
     const passwordHash = await hashPassword(password);
-    const updatedAdmin: Admin = {
-      ...admin,
-      passwordHash,
-      status: "activo",
+    const { data, error } = await supabase
+      .from('admins')
+      .update({ 
+        password_hash: passwordHash, 
+        status: "activo" 
+      })
+      .ilike('email', email)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return {
+        email: data.email,
+        passwordHash: data.password_hash,
+        status: data.status,
+        creadoEn: data.creado_en,
+        ultimoIngresoEn: data.ultimo_ingreso_en
     };
-
-    const updatedAdmins = database.admins.map((a) => (a.email === admin.email ? updatedAdmin : a));
-
-    await tournamentRepository.writeDatabase({
-      ...database,
-      admins: updatedAdmins,
-    });
-
-    return updatedAdmin;
   },
 
-  /**
-   * Authenticate admin with email and password
-   */
   async authenticateAdmin(email: string, password: string): Promise<Admin> {
     const admin = await this.findAdminByEmail(email);
-
-    if (!admin) {
-      throw new Error("Credenciales inválidas");
-    }
-
-    if (admin.status !== "activo" || !admin.passwordHash) {
+    if (!admin || admin.status !== "activo" || !admin.passwordHash) {
       throw new Error("Credenciales inválidas");
     }
 
     const isValid = await verifyPassword(password, admin.passwordHash);
-    if (!isValid) {
-      throw new Error("Credenciales inválidas");
-    }
+    if (!isValid) throw new Error("Credenciales inválidas");
 
     return admin;
   },
 
-  /**
-   * Add an admin to the whitelist
-   */
-  async addAdminToWhitelist(email: string): Promise<Admin> {
-    const database = await tournamentRepository.readDatabase();
-
-    const existingAdmin = database.admins.find((a) => a.email.toLowerCase() === email.toLowerCase());
-    if (existingAdmin) {
-      throw new Error("Este email ya está en la lista de administradores");
-    }
-
-    const newAdmin: Admin = {
-      email: email.toLowerCase(),
-      passwordHash: null,
-      status: "pendiente",
-      creadoEn: new Date().toISOString(),
-      ultimoIngresoEn: null,
-    };
-
-    await tournamentRepository.writeDatabase({
-      ...database,
-      admins: [...database.admins, newAdmin],
-    });
-
-    return newAdmin;
-  },
-
-  /**
-   * Update last login time
-   */
   async updateLastLogin(email: string): Promise<void> {
-    const database = await tournamentRepository.readDatabase();
-
-    const updatedAdmins = database.admins.map((admin) =>
-      admin.email.toLowerCase() === email.toLowerCase()
-        ? { ...admin, ultimoIngresoEn: new Date().toISOString() }
-        : admin
-    );
-
-    await tournamentRepository.writeDatabase({
-      ...database,
-      admins: updatedAdmins,
-    });
-  },
+    await supabase
+      .from('admins')
+      .update({ ultimo_ingreso_en: new Date().toISOString() })
+      .ilike('email', email);
+  }
 };

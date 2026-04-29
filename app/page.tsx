@@ -6,6 +6,8 @@ import { RegistrationSection } from "@/components/landing/registration-section";
 import { RulesSection } from "@/components/landing/rules-section";
 import { tournamentRepository } from "@/lib/repository";
 
+
+export const revalidate = 0; // Esto desactiva la caché y fuerza la carga dinámica
 // Función auxiliar para identificar el tipo de equipo (la misma que usamos en el admin)
 function getTeamType(team: any) {
   return team.tipoEquipo ?? (team.jugadores.length >= 3 ? "EQUIPO_3" : "PAREJA");

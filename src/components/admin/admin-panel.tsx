@@ -414,7 +414,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                     <button
                       type="button"
                       disabled={!canDeleteTeams || savingTeamId === editingTeamId}
-                      onClick={() => void handleDeleteTeam(editingTeamId)}
+                      onClick={() => editingTeamId && void handleDeleteTeam(editingTeamId)}
                       className="rounded-2xl border border-red-300 bg-white px-5 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-300 disabled:text-stone-400"
                     >
                       Eliminar equipo

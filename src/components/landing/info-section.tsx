@@ -38,13 +38,21 @@ export function InfoSection() {
               <p className="text-tierra-600">Por confirmar - Dependiendo de inscripciones</p>
             </div>
 
-            {/* Ubicación */}
-            <div className="rounded-2xl border-2 border-tierra-200 bg-white p-8 text-center hover:shadow-lg transition">
+            {/* Ubicación - EDITADA CON LINK A MAPS */}
+            <div className="rounded-2xl border-2 border-tierra-200 bg-white p-8 text-center hover:shadow-lg transition group">
               <div className="w-16 h-16 bg-oro-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <MapPin className="w-8 h-8 text-oro-600" />
+                <MapPin className="w-8 h-8 text-oro-600 group-hover:scale-110 transition-transform" />
               </div>
               <h3 className="text-xl font-serif font-bold text-tierra-900 mb-2">Ubicación</h3>
-              <p className="text-tierra-600">UTN - Campus Principal</p>
+              <a 
+                href="https://maps.app.goo.gl/J1r7CGDdphmuqpXK6" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-tierra-600 hover:text-oro-600 transition-colors inline-block"
+              >
+                📍 UTN - FRSR <br />
+                Av. Gral. J. J. de Urquiza 314
+              </a>
             </div>
           </div>
         </div>

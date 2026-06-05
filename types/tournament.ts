@@ -1,8 +1,6 @@
 export const teamStatuses = ["PENDIENTE", "APROBADO", "RECHAZADO"] as const;
 export type EquipoEstado = (typeof teamStatuses)[number];
 
-export const teamTypes = ["PAREJA", "EQUIPO_3"] as const;
-export type EquipoTipo = (typeof teamTypes)[number];
 
 export const tournamentStatuses = ["INSCRIPCION_ABIERTA", "TORNEO_EN_CURSO", "FINALIZADO"] as const;
 export type TorneoEstado = (typeof tournamentStatuses)[number];
@@ -15,7 +13,6 @@ export interface Jugador {
 export interface Equipo {
   id: string;
   nombre: string;
-  tipoEquipo: EquipoTipo;
   jugadores: Jugador[];
   whatsapp: string;
   estado: EquipoEstado;
@@ -65,10 +62,9 @@ export interface AppDatabase {
 
 export interface RegistrationInput {
   nombreEquipo: string;
-  tipoEquipo: EquipoTipo;
   jugador1: string;
   jugador2: string;
-  jugador3?: string;
+  jugador3: string;
   whatsapp: string;
 }
 

@@ -42,9 +42,6 @@ function renderTeamCard(
   return (
     <div className="rounded-2xl border-2 border-oro-300 bg-gradient-to-br from-oro-50 to-tierra-50 px-4 py-4">
       <div className="text-sm font-bold uppercase tracking-widest text-tierra-800">{team.nombre}</div>
-      <div className="mt-1 text-xs uppercase tracking-widest text-oro-700 font-semibold">
-        {team.tipoEquipo === "EQUIPO_3" ? "Equipo 3" : "Pareja"}
-      </div>
       <div className="mt-2 text-sm text-tierra-700">
         {team.jugadores.map((jugador) => (
           <div key={jugador.id} className="font-medium">

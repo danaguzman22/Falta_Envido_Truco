@@ -7,8 +7,10 @@ import { MapPin, Mail, MessageCircle, ChevronRight } from "lucide-react";
  */
 export function FooterSection() {
   const currentYear = new Date().getFullYear();
-  // Usamos el número de la organización para el link de WhatsApp
+  
+  // Traemos las variables de entorno (con un fallback por si alguna falla)
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ORGANIZATION_WHATSAPP_NUMBER;
+  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "info@utn.edu.ar";
 
   return (
     <footer 
@@ -29,18 +31,25 @@ export function FooterSection() {
             </p>
           </div>
 
-          {/* Contacto con Google Maps */}
+          {/* Contacto */}
           <div>
             <h3 className="font-serif text-xl font-bold mb-4 border-b border-oro-500/30 pb-2 inline-block">
               Contacto
             </h3>
             <ul className="space-y-4 text-stone-300 text-sm mt-4">
+              
+              {/* MAIL ORGANIZACIÓN OCULTO */}
               <li className="flex items-center gap-3">
                 <Mail size={18} className="text-oro-500" />
-                <a href="mailto:info@utn.edu.ar" className="hover:text-oro-400 transition-colors">
-                  info@utn.edu.ar
+                <a 
+                  href={`mailto:${contactEmail}`} 
+                  className="hover:text-oro-400 transition-colors font-medium"
+                >
+                  Mail Organización
                 </a>
               </li>
+
+              {/* WHATSAPP */}
               <li className="flex items-center gap-3">
                 <MessageCircle size={18} className="text-oro-500" />
                 <a 
@@ -52,11 +61,12 @@ export function FooterSection() {
                   WhatsApp Organización
                 </a>
               </li>
+
+              {/* UBICACIÓN MAPS */}
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-oro-500 mt-1" />
-                {/* HIPERVÍNCULO A GOOGLE MAPS */}
                 <a 
-                  href="https://maps.app.goo.gl/J1r7CGDdphmuqpXK6" 
+                  href="https://maps.google.com/?q=UTN+FRSR+San+Rafael" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="hover:text-oro-400 transition-colors leading-relaxed"

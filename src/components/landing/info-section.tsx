@@ -15,7 +15,7 @@ export function InfoSection() {
               Información del Torneo
             </h2>
             <p className="text-tierra-600 text-lg max-w-2xl mx-auto">
-              Todo lo que necesitas saber para participar en nuestro torneo tradicional
+              Todo lo que necesitas saber para participar en nuestro torneo
             </p>
           </div>
 
@@ -26,7 +26,7 @@ export function InfoSection() {
                 <Calendar className="w-8 h-8 text-oro-600" />
               </div>
               <h3 className="text-xl font-serif font-bold text-tierra-900 mb-2">Fecha</h3>
-              <p className="text-tierra-600">Próximamente (Consultar con administración)</p>
+              <p className="text-tierra-600 font-medium">Sábado, 20 de Junio de 2026</p>
             </div>
 
             {/* Hora */}
@@ -38,14 +38,14 @@ export function InfoSection() {
               <p className="text-tierra-600">Por confirmar - Dependiendo de inscripciones</p>
             </div>
 
-            {/* Ubicación - EDITADA CON LINK A MAPS */}
+            {/* Ubicación - LINK A MAPS CORREGIDO */}
             <div className="rounded-2xl border-2 border-tierra-200 bg-white p-8 text-center hover:shadow-lg transition group">
               <div className="w-16 h-16 bg-oro-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-8 h-8 text-oro-600 group-hover:scale-110 transition-transform" />
               </div>
               <h3 className="text-xl font-serif font-bold text-tierra-900 mb-2">Ubicación</h3>
               <a 
-                href="https://maps.app.goo.gl/J1r7CGDdphmuqpXK6" 
+                href="https://maps.google.com/?q=UTN+FRSR+Av.+Gral.+J.+J.+de+Urquiza+314,+San+Rafael,+Mendoza" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-tierra-600 hover:text-oro-600 transition-colors inline-block"

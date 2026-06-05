@@ -16,18 +16,23 @@ export function buildOrganizationWhatsappUrl(input: RegistrationInput): string {
   // En el servidor (API) usamos ORGANIZATION_WHATSAPP_NUMBER del .env
   const organizationPhone = process.env.ORGANIZATION_WHATSAPP_NUMBER ?? ORGANIZATION_WHATSAPP_NUMBER;
   const normalizedOrganizationPhone = normalizePhone(organizationPhone);
-  
-  const teamLabel = input.tipoEquipo === "EQUIPO_3" ? "equipo de 3" : "pareja";
-  
+
   const players = [input.jugador1, input.jugador2, input.jugador3]
     .filter((player): player is string => Boolean(player && player.trim()));
-    
+
   const message = [
-    `Hola, somos el ${teamLabel} "${input.nombreEquipo}".`,
-    `Quedamos inscriptos en ${NOMBRE_TORNEO}.`,
-    `Integrantes: ${players.join(", ")}.`,
-    `WhatsApp de contacto: ${input.whatsapp}.`,
-  ].join(" ");
+    `¡Hola! Somos el equipo **${input.nombreEquipo}** y queremos inscribirnos en el torneo **${NOMBRE_TORNEO}**.`,
+    "",
+    "Estos son nuestros integrantes:",
+    "",
+    `1. ${players[0] ?? ""}`,
+    `2. ${players[1] ?? ""}`,
+    `3. ${players[2] ?? ""}`,
+    "",
+    `Teléfono de contacto: **${input.whatsapp}**`,
+    "",
+    "¿Qué pasos debemos seguir para confirmar nuestra inscripción y el pago? ¡Muchas gracias!",
+  ].join("\n");
 
   return `https://wa.me/${normalizedOrganizationPhone}?text=${encodeURIComponent(message)}`;
 }

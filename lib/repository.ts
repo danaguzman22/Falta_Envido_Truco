@@ -13,10 +13,10 @@ import type {
 export interface TournamentRepository {
   readDatabase(): Promise<AppDatabase>;
   writeDatabase(database: AppDatabase): Promise<void>;
-  createRegistration(input: RegistrationInput): Promise<Equipo>;
+  createRegistration(input: RegistrationInput): Promise<Equipo>; 
   approveTeam(teamId: string): Promise<Equipo>;
   updateTournamentSettings(input: { totalTeams: number; estado: TorneoEstado }): Promise<Torneo>;
-  updateTeam(teamId: string, input: RegistrationInput): Promise<Equipo>;
+  updateTeam(teamId: string, input: RegistrationInput): Promise<Equipo>; 
   deleteTeam(teamId: string): Promise<void>;
   generateTournament(): Promise<Torneo>;
   getPublicBracketView(): Promise<PublicBracketView>;
@@ -52,7 +52,7 @@ async function fetchFullDatabase(): Promise<AppDatabase> {
   const equipos: Equipo[] = (equiposRaw || []).map(e => ({
     id: e.id,
     nombre: e.nombre,
-    tipoEquipo: e.tipo_equipo,
+    // Eliminado: tipoEquipo: e.tipo_equipo
     jugadores: e.jugadores,
     whatsapp: e.whatsapp,
     estado: e.estado,
@@ -107,13 +107,11 @@ export const tournamentRepository: TournamentRepository = {
     const newEquipoSQL = {
       id: createId("team"),
       nombre: input.nombreEquipo.trim(),
-      tipo_equipo: input.tipoEquipo,
+      tipo_equipo: "EQUIPO_3", // Se mantiene en SQL por si la columna es obligatoria en Supabase
       jugadores: [
         { id: createId("player"), nombre: input.jugador1.trim() },
         { id: createId("player"), nombre: input.jugador2.trim() },
-        ...(input.tipoEquipo === "EQUIPO_3" && input.jugador3?.trim()
-          ? [{ id: createId("player"), nombre: input.jugador3.trim() }]
-          : []),
+        { id: createId("player"), nombre: input.jugador3?.trim() || "" }, 
       ],
       whatsapp: sanitizeWhatsappForStorage(input.whatsapp),
       estado: "PENDIENTE",
@@ -126,7 +124,7 @@ export const tournamentRepository: TournamentRepository = {
     return {
       id: newEquipoSQL.id,
       nombre: newEquipoSQL.nombre,
-      tipoEquipo: newEquipoSQL.tipo_equipo,
+      // Eliminado: tipoEquipo
       jugadores: newEquipoSQL.jugadores,
       whatsapp: newEquipoSQL.whatsapp,
       estado: newEquipoSQL.estado as any,
@@ -150,7 +148,7 @@ export const tournamentRepository: TournamentRepository = {
     return {
         id: data.id,
         nombre: data.nombre,
-        tipoEquipo: data.tipo_equipo,
+        // Eliminado: tipoEquipo
         jugadores: data.jugadores,
         whatsapp: data.whatsapp,
         estado: data.estado,
@@ -164,13 +162,11 @@ export const tournamentRepository: TournamentRepository = {
       .from('equipos')
       .update({
         nombre: input.nombreEquipo.trim(),
-        tipo_equipo: input.tipoEquipo,
+        tipo_equipo: "EQUIPO_3", // Se mantiene en SQL
         jugadores: [
           { id: createId("player"), nombre: input.jugador1.trim() },
           { id: createId("player"), nombre: input.jugador2.trim() },
-          ...(input.tipoEquipo === "EQUIPO_3" && input.jugador3?.trim()
-            ? [{ id: createId("player"), nombre: input.jugador3.trim() }]
-            : []),
+          { id: createId("player"), nombre: input.jugador3?.trim() || "" },
         ],
         whatsapp: sanitizeWhatsappForStorage(input.whatsapp),
       })
@@ -182,7 +178,7 @@ export const tournamentRepository: TournamentRepository = {
     return {
       id: data.id,
       nombre: data.nombre,
-      tipoEquipo: data.tipo_equipo,
+      // Eliminado: tipoEquipo
       jugadores: data.jugadores,
       whatsapp: data.whatsapp,
       estado: data.estado,
@@ -200,8 +196,8 @@ export const tournamentRepository: TournamentRepository = {
     const database = await this.readDatabase();
     const updatedTournament: Torneo = {
       ...database.torneo,
-      totalEquipos: input.totalTeams,
       estado: input.estado,
+      totalEquipos: 100 // Ajuste dinámico de ser necesario
     };
 
     await this.writeDatabase({ ...database, torneo: updatedTournament });
@@ -296,7 +292,6 @@ export const adminRepository = {
       .ilike('email', email);
   },
 
-  // ESTA ES LA FUNCIÓN QUE TE PIDE VERCEL AHORA
   async addAdminToWhitelist(email: string): Promise<Admin> {
     const { data, error } = await supabase
       .from('admins')

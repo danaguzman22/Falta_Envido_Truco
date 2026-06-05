@@ -3,9 +3,10 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Clock, LogOut, Settings, Trophy, Users } from "lucide-react";
+import { CheckCircle, Clock, LogOut, Settings, Users, Calendar } from "lucide-react";
 
-import type { EquipoTipo, PublicBracketView } from "@/types";
+// Eliminamos la importación de EquipoTipo que ya no existe
+import type { PublicBracketView } from "@/types";
 
 type AdminPanelProps = {
   adminUser: string;
@@ -14,22 +15,18 @@ type AdminPanelProps = {
 
 type TeamDraft = {
   nombre: string;
-  tipoEquipo: EquipoTipo;
   jugador1: string;
   jugador2: string;
   jugador3: string;
   whatsapp: string;
 };
 
+// Pestañas simplificadas: Unificamos las listas eliminando filtros obsoletos de categorías
 const TAB_OPTIONS = [
-  { id: "inscriptos", label: "Todos", icon: Users },
-  { id: "parejas", label: "Parejas", icon: Users },
-  { id: "equipo3", label: "Equipo 3", icon: Users },
+  { id: "inscriptos", label: "Todos los Equipos", icon: Users },
   { id: "pendientes", label: "Pendientes a Aprobar", icon: Clock },
-  { id: "cupo", label: "Editar Cupo", icon: Settings },
+  { id: "cupo", label: "Estado del Torneo", icon: Settings },
 ] as const;
-
-const CAPACITY_OPTIONS = [8, 16, 32, 64];
 
 function formatDate(isoDate: string | null): string {
   if (!isoDate) {
@@ -43,7 +40,7 @@ function formatDate(isoDate: string | null): string {
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
 
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
+  return `${day}/${month}/${year} a las ${hours}:${minutes} hs`;
 }
 
 function StatCard({ title, value, icon }: { title: string; value: string | number; icon: ReactNode }) {
@@ -51,7 +48,7 @@ function StatCard({ title, value, icon }: { title: string; value: string | numbe
     <div className="flex items-center gap-4 rounded-xl border border-[#8B735B]/20 bg-[#8B735B]/10 p-6">
       <div className="rounded-lg bg-white p-3 shadow-sm">{icon}</div>
       <div>
-        <p className="text-xs font-bold uppercase text-stone-500">{title}</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-stone-500">{title}</p>
         <p className="text-2xl font-black text-[#2D241E]">{value}</p>
       </div>
     </div>
@@ -59,30 +56,30 @@ function StatCard({ title, value, icon }: { title: string; value: string | numbe
 }
 
 function StatusPill({ label, active }: { label: string; active: boolean }) {
+  const getLabelText = (status: string) => {
+    if (status === "INSCRIPCION_ABIERTA") return "Inscripciones Abiertas";
+    if (status === "INSCRIPCION_CERRADA") return "Inscripciones Pausadas";
+    if (status === "TORNEO_EN_CURSO") return "Torneo en Curso";
+    if (status === "FINALIZADO") return "Torneo Finalizado";
+    return status;
+  };
+
   return (
     <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${
+      className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] ${
         active ? "bg-emerald-400/15 text-emerald-700" : "bg-amber-400/15 text-amber-700"
       }`}
     >
-      {label}
+      {getLabelText(label)}
     </span>
   );
-}
-
-function getTeamType(team: PublicBracketView["equipos"][number]): EquipoTipo {
-  return team.tipoEquipo ?? (team.jugadores.length >= 3 ? "EQUIPO_3" : "PAREJA");
-}
-
-function getTeamTypeLabel(teamType: EquipoTipo): string {
-  return teamType === "EQUIPO_3" ? "Equipo 3" : "Pareja";
 }
 
 function renderPlayers(team: PublicBracketView["equipos"][number]): ReactNode {
   return (
     <div className="space-y-1">
       {team.jugadores.map((jugador) => (
-        <div key={jugador.id}>{jugador.nombre}</div>
+        <div key={jugador.id} className="text-sm text-stone-700 font-medium">· {jugador.nombre}</div>
       ))}
     </div>
   );
@@ -90,39 +87,18 @@ function renderPlayers(team: PublicBracketView["equipos"][number]): ReactNode {
 
 export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"inscriptos" | "parejas" | "equipo3" | "pendientes" | "cupo">(
-    "inscriptos"
-  );
+  const [activeTab, setActiveTab] = useState<"inscriptos" | "pendientes" | "cupo">("inscriptos");
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
   const [draft, setDraft] = useState<TeamDraft | null>(null);
   const [savingTeamId, setSavingTeamId] = useState<string | null>(null);
   const [editMessage, setEditMessage] = useState<string | null>(null);
 
-// 1. Totales generales
+  // 1. Totales generales unificados (Sin límites fijos de /32)
   const totalTeams = publicView.equipos.length;
-  const pendingTeams = publicView.equipos.filter((equipo) => equipo.estado === "PENDIENTE").length;
+  const approvedTeams = publicView.equipos.filter((e) => e.estado === "APROBADO").length;
+  const pendingTeams = publicView.equipos.filter((e) => e.estado === "PENDIENTE").length;
 
-  // 2. Filtramos aprobados por categoría
-  const approvedPairs = publicView.equipos.filter(
-    (e) => e.estado === "APROBADO" && getTeamType(e) === "PAREJA"
-  ).length;
-
-  const approvedTrios = publicView.equipos.filter(
-    (e) => e.estado === "APROBADO" && getTeamType(e) === "EQUIPO_3"
-  ).length;
-
-  // 3. Definimos el cupo máximo por categoría (32)
-  const CUPO_MAX_CATEGORIA = 32;
-
-  // 4. Listas filtradas para las pestañas
-  const pairTeams = publicView.equipos.filter((equipo) => getTeamType(equipo) === "PAREJA");
-  const trioTeams = publicView.equipos.filter((equipo) => getTeamType(equipo) === "EQUIPO_3");
-
-  // 5. Lógica de generación condicionada a la pestaña activa
-  const tournamentCapacity = CUPO_MAX_CATEGORIA; 
-  const canGenerate = (activeTab === "parejas" && approvedPairs >= CUPO_MAX_CATEGORIA) || 
-                      (activeTab === "equipo3" && approvedTrios >= CUPO_MAX_CATEGORIA);
-                      
+  // Las inscripciones solo están abiertas si el estado acompaña
   const canDeleteTeams = publicView.torneo.estado === "INSCRIPCION_ABIERTA";
 
   const tabClass = (id: typeof activeTab) =>
@@ -134,46 +110,32 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
 
   const pendingOnly = publicView.equipos.filter((equipo) => equipo.estado === "PENDIENTE");
 
-  const capacityChoices = CAPACITY_OPTIONS.includes(tournamentCapacity)
-    ? CAPACITY_OPTIONS
-    : [...CAPACITY_OPTIONS, tournamentCapacity].sort((left, right) => left - right);
-
   const editingTeam = useMemo(
     () => publicView.equipos.find((equipo) => equipo.id === editingTeamId) ?? null,
     [editingTeamId, publicView.equipos]
   );
 
+  // Filtro unificado para la tabla de control
   const visibleTeams = useMemo(() => {
-    if (activeTab === "parejas") {
-      return pairTeams;
+    if (activeTab === "pendientes") {
+      return pendingOnly;
     }
-
-    if (activeTab === "equipo3") {
-      return trioTeams;
-    }
-
     return publicView.equipos;
-  }, [activeTab, pairTeams, publicView.equipos, trioTeams]);
+  }, [activeTab, publicView.equipos, pendingOnly]);
 
   const listTitle =
-    activeTab === "parejas"
-      ? "Lista de parejas"
-      : activeTab === "equipo3"
-        ? "Lista de equipos de 3"
-        : "Lista maestra de equipos";
+    activeTab === "pendientes"
+      ? "Equipos Pendientes de Aprobación"
+      : "Lista Maestra de Equipos Registrados";
 
   function startEditingTeam(teamId: string): void {
     const team = publicView.equipos.find((equipo) => equipo.id === teamId);
-
-    if (!team) {
-      return;
-    }
+    if (!team) return;
 
     setEditingTeamId(team.id);
     setDraft({
       nombre: team.nombre,
-      tipoEquipo: getTeamType(team),
-      jugador1: team.jugadores[0].nombre,
+      jugador1: team.jugadores[0]?.nombre ?? "",
       jugador2: team.jugadores[1]?.nombre ?? "",
       jugador3: team.jugadores[2]?.nombre ?? "",
       whatsapp: team.whatsapp,
@@ -188,9 +150,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
   }
 
   async function handleSaveTeam(): Promise<void> {
-    if (!editingTeamId || !draft) {
-      return;
-    }
+    if (!editingTeamId || !draft) return;
 
     setSavingTeamId(editingTeamId);
     setEditMessage(null);
@@ -198,24 +158,18 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
     try {
       const response = await fetch(`/api/admin/equipos/${editingTeamId}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombreEquipo: draft.nombre,
-          tipoEquipo: draft.tipoEquipo,
           jugador1: draft.jugador1,
           jugador2: draft.jugador2,
-          jugador3: draft.tipoEquipo === "EQUIPO_3" ? draft.jugador3 : "",
+          jugador3: draft.jugador3,
           whatsapp: draft.whatsapp,
         }),
       });
 
       const payload = (await response.json()) as { message?: string };
-
-      if (!response.ok) {
-        throw new Error(payload.message ?? "No se pudo actualizar el equipo");
-      }
+      if (!response.ok) throw new Error(payload.message ?? "No se pudo actualizar el equipo");
 
       setEditMessage("Equipo actualizado correctamente");
       closeEditor();
@@ -229,35 +183,20 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
 
   async function handleDeleteTeam(teamId: string): Promise<void> {
     const team = publicView.equipos.find((equipo) => equipo.id === teamId);
-
-    if (!team) {
-      return;
-    }
+    if (!team) return;
 
     const confirmed = window.confirm(`¿Eliminar al equipo "${team.nombre}"? Esta acción no se puede deshacer.`);
-
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
 
     setSavingTeamId(teamId);
     setEditMessage(null);
 
     try {
-      const response = await fetch(`/api/admin/equipos/${teamId}`, {
-        method: "DELETE",
-      });
-
+      const response = await fetch(`/api/admin/equipos/${teamId}`, { method: "DELETE" });
       const payload = (await response.json()) as { message?: string };
+      if (!response.ok) throw new Error(payload.message ?? "No se pudo eliminar el equipo");
 
-      if (!response.ok) {
-        throw new Error(payload.message ?? "No se pudo eliminar el equipo");
-      }
-
-      if (editingTeamId === teamId) {
-        closeEditor();
-      }
-
+      if (editingTeamId === teamId) closeEditor();
       setEditMessage("Equipo eliminado correctamente");
       router.refresh();
     } catch (error) {
@@ -287,11 +226,21 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
       </header>
 
       <main className="mx-auto max-w-7xl p-8">
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-          <StatCard title="Total Inscritos" value={totalTeams} icon={<Users className="text-blue-500" />} />
-          <StatCard title="Cupo Parejas" value={`${approvedPairs} / ${CUPO_MAX_CATEGORIA}`} icon={<CheckCircle className="text-green-500" />} />
-          <StatCard title="Cupo Equipo 3" value={`${approvedTrios} / ${CUPO_MAX_CATEGORIA}`} icon={<Trophy className="text-oro-500" />} />
-          <StatCard title="Pendientes" value={pendingTeams} icon={<Clock className="text-yellow-500" />} />
+        {/* REGLAMENTO E INFO DE UTN INTEGRADA EN ALERTA INFORMATIVA */}
+        <div className="mb-6 rounded-2xl border border-oro-400/40 bg-[#8B735B]/5 p-5 text-sm text-stone-800 shadow-sm">
+          <h4 className="font-bold text-[#2D241E] flex items-center gap-2 text-base">
+            <Calendar size={18} className="text-oro-600" /> Control del Reglamento y Flujo Operativo UTN
+          </h4>
+          <p className="mt-2 text-stone-600 leading-relaxed">
+            Desde este panel administrás las inscripciones del torneo interuniversitario. Recordá que, según las bases acordadas, una vez que el estado operativo pase a <strong>Torneo en Curso</strong> o <strong>Finalizado</strong>, la carga pública quedará bloqueada por completo para garantizar la transparencia del sorteo externo.
+          </p>
+        </div>
+
+        {/* CONTADORES UNIFICADOS SIN EL LÍMITE SOBERBIO DE PAREJAS/EQUIPOS INDIVIDUALES */}
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <StatCard title="Total de Inscriptos" value={totalTeams} icon={<Users className="text-blue-500" />} />
+          <StatCard title="Equipos Aprobados" value={approvedTeams} icon={<CheckCircle className="text-green-500" />} />
+          <StatCard title="Equipos en Espera" value={pendingTeams} icon={<Clock className="text-yellow-500" />} />
         </div>
 
         <nav className="flex flex-wrap gap-1 border-b-2 border-[#8B735B]">
@@ -309,22 +258,24 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
             </div>
           ) : null}
 
-          {activeTab === "inscriptos" || activeTab === "parejas" || activeTab === "equipo3" ? (
+          {/* VISTA MAESTRA O DE PENDIENTES */}
+          {activeTab === "inscriptos" || activeTab === "pendientes" ? (
             <div className="animate-fadeIn space-y-5">
               <div className="flex flex-col gap-3 border-b border-[#8B735B]/10 pb-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Gestión de equipos</p>
+                  <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Gestión de inscriptos</p>
                   <h2 className="mt-1 text-2xl font-bold text-[#2D241E]">{listTitle}</h2>
                 </div>
-                <StatusPill label={publicView.torneo.estado} active={publicView.torneo.estado === "TORNEO_EN_CURSO"} />
+                <StatusPill label={publicView.torneo.estado} active={publicView.torneo.estado === "INSCRIPCION_ABIERTA"} />
               </div>
 
               {!canDeleteTeams ? (
                 <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                  La eliminación de equipos solo está habilitada mientras las inscripciones están abiertas.
+                  La modificación y eliminación de registros se bloquea automáticamente cuando la inscripción no está abierta.
                 </div>
               ) : null}
 
+              {/* EDITOR INTEGRADO */}
               {editingTeam && draft ? (
                 <div className="rounded-2xl border-2 border-oro-300 bg-[#F5F5DC] p-5 shadow-lg">
                   <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
@@ -332,11 +283,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                       <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Edición de equipo</p>
                       <h3 className="mt-1 text-xl font-bold text-[#2D241E]">{editingTeam.nombre}</h3>
                     </div>
-                    <button
-                      type="button"
-                      onClick={closeEditor}
-                      className="text-sm font-semibold text-stone-600 hover:text-[#2D241E]"
-                    >
+                    <button type="button" onClick={closeEditor} className="text-sm font-semibold text-stone-600 hover:text-[#2D241E]">
                       Cerrar editor
                     </button>
                   </div>
@@ -349,27 +296,6 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                         onChange={(event) => setDraft((current) => (current ? { ...current, nombre: event.target.value } : current))}
                         className="w-full rounded-lg border-2 border-[#8B735B] bg-white p-3"
                       />
-                    </label>
-
-                    <label className="space-y-2 md:col-span-2">
-                      <span className="text-sm font-bold text-[#2D241E]">Tipo de equipo</span>
-                      <select
-                        value={draft.tipoEquipo}
-                        onChange={(event) =>
-                          setDraft((current) =>
-                            current
-                              ? {
-                                  ...current,
-                                  tipoEquipo: event.target.value === "EQUIPO_3" ? "EQUIPO_3" : "PAREJA",
-                                }
-                              : current
-                          )
-                        }
-                        className="w-full rounded-lg border-2 border-[#8B735B] bg-white p-3"
-                      >
-                        <option value="PAREJA">Pareja</option>
-                        <option value="EQUIPO_3">Equipo 3</option>
-                      </select>
                     </label>
 
                     <label className="space-y-2">
@@ -390,21 +316,19 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                       />
                     </label>
 
-                    {draft.tipoEquipo === "EQUIPO_3" ? (
-                      <label className="space-y-2 md:col-span-2">
-                        <span className="text-sm font-bold text-[#2D241E]">Jugador 3</span>
-                        <input
-                          value={draft.jugador3}
-                          onChange={(event) =>
-                            setDraft((current) => (current ? { ...current, jugador3: event.target.value } : current))
-                          }
-                          className="w-full rounded-lg border-2 border-[#8B735B] bg-white p-3"
-                        />
-                      </label>
-                    ) : null}
+                    <label className="space-y-2 md:col-span-2">
+                      <span className="text-sm font-bold text-[#2D241E]">Jugador 3 (Suplente/Tercero Opcional)</span>
+                      <input
+                        value={draft.jugador3}
+                        onChange={(event) =>
+                          setDraft((current) => (current ? { ...current, jugador3: event.target.value } : current))
+                        }
+                        className="w-full rounded-lg border-2 border-[#8B735B] bg-white p-3"
+                      />
+                    </label>
 
                     <label className="space-y-2 md:col-span-2">
-                      <span className="text-sm font-bold text-[#2D241E]">WhatsApp</span>
+                      <span className="text-sm font-bold text-[#2D241E]">WhatsApp de contacto</span>
                       <input
                         value={draft.whatsapp}
                         onChange={(event) => setDraft((current) => (current ? { ...current, whatsapp: event.target.value } : current))}
@@ -414,11 +338,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                   </div>
 
                   <div className="mt-5 flex flex-col gap-3 md:flex-row md:justify-end">
-                    <button
-                      type="button"
-                      onClick={closeEditor}
-                      className="rounded-2xl border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-[#2D241E]"
-                    >
+                    <button type="button" onClick={closeEditor} className="rounded-2xl border border-stone-300 bg-white px-5 py-3 text-sm font-semibold text-[#2D241E]">
                       Cancelar
                     </button>
                     <button
@@ -441,16 +361,16 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                 </div>
               ) : null}
 
+              {/* TABLA PRINCIPAL */}
               <div className="overflow-x-auto">
                 {visibleTeams.length > 0 ? (
                   <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
                     <thead>
                       <tr className="text-xs uppercase tracking-[0.24em] text-stone-500">
                         <th className="border-b border-[#8B735B]/10 px-4 py-3">Equipo</th>
-                        <th className="border-b border-[#8B735B]/10 px-4 py-3">Tipo</th>
                         <th className="border-b border-[#8B735B]/10 px-4 py-3">Jugadores</th>
                         <th className="border-b border-[#8B735B]/10 px-4 py-3">WhatsApp</th>
-                        <th className="border-b border-[#8B735B]/10 px-4 py-3">Estado</th>
+                        <th className="border-b border-[#8B735B]/10 px-4 py-3">Estado de Pago</th>
                         <th className="border-b border-[#8B735B]/10 px-4 py-3">Acciones</th>
                       </tr>
                     </thead>
@@ -460,16 +380,20 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
 
                         return (
                           <tr key={team.id} className="align-top text-[#2D241E]">
-                            <td className="border-b border-[#8B735B]/10 px-4 py-4 font-semibold">{team.nombre}</td>
-                            <td className="border-b border-[#8B735B]/10 px-4 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">
-                              {getTeamTypeLabel(getTeamType(team))}
+                            <td className="border-b border-[#8B735B]/10 px-4 py-4 font-semibold">
+                              {team.nombre}
+                              <div className="text-[10px] font-mono mt-0.5 text-stone-400 uppercase tracking-wider">
+                                {team.jugadores.length >= 3 ? "Trío" : "Pareja"}
+                              </div>
                             </td>
                             <td className="border-b border-[#8B735B]/10 px-4 py-4">{renderPlayers(team)}</td>
-                            <td className="border-b border-[#8B735B]/10 px-4 py-4">{team.whatsapp}</td>
+                            <td className="border-b border-[#8B735B]/10 px-4 py-4 font-medium">{team.whatsapp}</td>
                             <td className="border-b border-[#8B735B]/10 px-4 py-4">
-                              <div className="space-y-2">
+                              <div className="space-y-1.5">
                                 <StatusPill label={team.estado} active={team.estado === "APROBADO"} />
-                                <div className="text-xs text-stone-500">Creado: {formatDate(team.creadoEn)}</div>
+                                <div className="text-[11px] text-stone-500 font-medium">
+                                  Inscrito: {formatDate(team.creadoEn)}
+                                </div>
                               </div>
                             </td>
                             <td className="border-b border-[#8B735B]/10 px-4 py-4">
@@ -477,7 +401,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                                 <button
                                   type="button"
                                   onClick={() => startEditingTeam(team.id)}
-                                  className="rounded-2xl border border-[#8B735B] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#2D241E] transition hover:bg-[#F5F5DC]"
+                                  className="rounded-2xl border border-[#8B735B] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-[#2D241E] transition hover:bg-[#F5F5DC]"
                                 >
                                   Editar
                                 </button>
@@ -485,7 +409,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                                   type="button"
                                   onClick={() => void handleDeleteTeam(team.id)}
                                   disabled={!canDeleteTeams || savingTeamId === team.id}
-                                  className="rounded-2xl border border-red-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-300 disabled:text-stone-400"
+                                  className="rounded-2xl border border-red-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-300 disabled:text-stone-400"
                                 >
                                   Eliminar
                                 </button>
@@ -493,7 +417,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                                   <button
                                     type="submit"
                                     disabled={!canApprove}
-                                    className="rounded-2xl bg-[#8B735B] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#7a6550] disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500"
+                                    className="rounded-2xl bg-[#8B735B] px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-white transition hover:bg-[#7a6550] disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500"
                                   >
                                     Aprobar pago
                                   </button>
@@ -507,156 +431,50 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
                   </table>
                 ) : (
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
-                    {activeTab === "parejas"
-                      ? "No hay parejas registradas todavía."
-                      : activeTab === "equipo3"
-                        ? "No hay equipos de 3 registrados todavía."
-                        : "No hay equipos registrados actualmente."}
+                    {activeTab === "pendientes"
+                      ? "No hay ningún equipo pendiente de aprobación en este momento."
+                      : "No hay ningún equipo registrado en el sistema todavía."}
                   </div>
                 )}
               </div>
-
-              <div className="flex flex-col gap-3 border-t border-[#8B735B]/10 pt-5 md:flex-row md:items-center md:justify-between">
-                <div className="text-sm text-stone-600">
-                  {canGenerate
-                    ? "Ya hay suficientes equipos aprobados para generar el torneo."
-                  : `Faltan equipos aprobados en esta categoría para activar el bracket.`}  
-                </div>
-
-                <form action="/api/admin/generar-torneo" method="post">
-                  <button
-                    type="submit"
-                    disabled={!canGenerate}
-                    className="rounded-2xl bg-[#8B735B] px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#7a6550] disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500"
-                  >
-                    Generar torneo
-                  </button>
-                </form>
-              </div>
             </div>
           ) : null}
 
-          {activeTab === "pendientes" ? (
-            <div className="animate-fadeIn space-y-5">
-              <div className="flex flex-col gap-3 border-b border-[#8B735B]/10 pb-4 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Validación</p>
-                  <h2 className="mt-1 text-2xl font-bold text-[#2D241E]">Pendientes a Aprobar</h2>
-                </div>
-                <StatusPill label={`${pendingOnly.length} pendientes`} active={pendingOnly.length === 0} />
-              </div>
-
-              {pendingOnly.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full border-separate border-spacing-0 text-left text-sm">
-                    <thead>
-                      <tr className="text-xs uppercase tracking-[0.24em] text-stone-500">
-                        <th className="border-b border-[#8B735B]/10 px-4 py-3">Equipo</th>
-                        <th className="border-b border-[#8B735B]/10 px-4 py-3">Jugadores</th>
-                        <th className="border-b border-[#8B735B]/10 px-4 py-3">WhatsApp</th>
-                        <th className="border-b border-[#8B735B]/10 px-4 py-3">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pendingOnly.map((team) => (
-                        <tr key={team.id} className="align-top text-[#2D241E]">
-                          <td className="border-b border-[#8B735B]/10 px-4 py-4 font-semibold">{team.nombre}</td>
-                          <td className="border-b border-[#8B735B]/10 px-4 py-4">
-                            {renderPlayers(team)}
-                          </td>
-                          <td className="border-b border-[#8B735B]/10 px-4 py-4">{team.whatsapp}</td>
-                          <td className="border-b border-[#8B735B]/10 px-4 py-4">
-                            <div className="flex flex-wrap gap-2">
-                              <button
-                                type="button"
-                                onClick={() => startEditingTeam(team.id)}
-                                className="rounded-2xl border border-[#8B735B] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#2D241E] transition hover:bg-[#F5F5DC]"
-                              >
-                                Editar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => void handleDeleteTeam(team.id)}
-                                disabled={!canDeleteTeams || savingTeamId === team.id}
-                                className="rounded-2xl border border-red-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:border-stone-300 disabled:text-stone-400"
-                              >
-                                Eliminar
-                              </button>
-                              <form action={`/api/admin/equipos/${team.id}/approve`} method="post">
-                                <button
-                                  type="submit"
-                                  className="rounded-2xl bg-[#8B735B] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-[#7a6550]"
-                                >
-                                  Aprobar pago
-                                </button>
-                              </form>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">
-                  No hay equipos pendientes actualmente.
-                </div>
-              )}
-            </div>
-          ) : null}
-
+          {/* CONFIGURACIÓN SÓLO DEL ESTADO OPERATIVO */}
           {activeTab === "cupo" ? (
             <div className="animate-fadeIn max-w-2xl space-y-6">
               <div className="flex flex-col gap-3 border-b border-[#8B735B]/10 pb-4 md:flex-row md:items-end md:justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Configuración</p>
-                  <h2 className="mt-1 text-2xl font-bold text-[#2D241E]">Editar cupo del torneo</h2>
+                  <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Configuración Operativa</p>
+                  <h2 className="mt-1 text-2xl font-bold text-[#2D241E]">Gestionar Estado de Inscripción</h2>
                 </div>
-                <StatusPill
-                  label={publicView.torneo.estado === "INSCRIPCION_ABIERTA" ? "Editable" : "Estado editable"}
-                  active={publicView.torneo.estado === "INSCRIPCION_ABIERTA"}
-                />
               </div>
 
               <div className="rounded-2xl border border-[#8B735B]/20 bg-[#F5F5DC] p-6">
-                <p className="text-sm text-stone-700">
-                      Cupo actual: <span className="font-bold text-[#2D241E]">{tournamentCapacity} equipos</span>. Podés cambiar el estado del torneo y el cupo desde este formulario.
+                <p className="text-sm text-stone-700 leading-relaxed">
+                  Modificá las compuertas de la landing page. Al seleccionar <strong>Torneo en curso</strong> o <strong>Torneo finalizado</strong>, el backend bloqueará de forma inmediata el ingreso de nuevos formularios públicos.
                 </p>
 
                 <form action="/api/admin/cupo" method="post" className="mt-5 space-y-4">
                   <label className="block space-y-2">
-                    <span className="text-sm font-bold text-[#2D241E]">Cantidad de equipos</span>
+                    <span className="text-sm font-bold text-[#2D241E]">Estado actual de la plataforma</span>
                     <select
-                      name="totalTeams"
-                      defaultValue={tournamentCapacity}
-                      className="w-full rounded-lg border-2 border-[#8B735B] bg-[#F5F5DC] p-3"
+                      name="estado"
+                      defaultValue={publicView.torneo.estado}
+                      className="w-full rounded-lg border-2 border-[#8B735B] bg-white p-3 font-medium text-[#2D241E]"
                     >
-                      {capacityChoices.map((option) => (
-                        <option key={option} value={option}>
-                          {option} equipos
-                        </option>
-                      ))}
+                      <option value="INSCRIPCION_ABIERTA">Inscripciones Abiertas (Formulario público activo)</option>
+                      <option value="INSCRIPCION_CERRADA">Inscripciones Cerradas (Formulario pausado)</option>
+                      <option value="TORNEO_EN_CURSO">Torneo en Curso (Inscripciones clausuradas por sorteo)</option>
+                      <option value="FINALIZADO">Torneo Finalizado (Plataforma en archivo histórico)</option>
                     </select>
                   </label>
 
-                      <label className="block space-y-2">
-                        <span className="text-sm font-bold text-[#2D241E]">Estado del torneo</span>
-                        <select
-                          name="estado"
-                          defaultValue={publicView.torneo.estado}
-                          className="w-full rounded-lg border-2 border-[#8B735B] bg-[#F5F5DC] p-3"
-                        >
-                          <option value="INSCRIPCION_ABIERTA">Inscripción abierta</option>
-                          <option value="TORNEO_EN_CURSO">Torneo en curso</option>
-                          <option value="FINALIZADO">Finalizado</option>
-                        </select>
-                      </label>
-
                   <button
                     type="submit"
-                    className="w-full rounded-lg bg-[#8B735B] px-6 py-3 font-bold text-white transition hover:bg-[#7a6550] disabled:cursor-not-allowed disabled:bg-stone-300 disabled:text-stone-500"
+                    className="w-full rounded-lg bg-[#8B735B] px-6 py-3 font-bold text-white transition hover:bg-[#7a6550]"
                   >
-                        Guardar cambios
+                    Guardar Cambios de Estado
                   </button>
                 </form>
               </div>
@@ -666,7 +484,7 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
       </main>
 
       <footer className="mt-6 bg-[#2D241E] px-4 py-5 text-center text-sm text-stone-300">
-        Panel de Administración UTN · Gestión de inscriptos, cupo y generación del torneo.
+        Panel de Administración UTN · Control unificado de inscriptos y estados operativos de la landing.
       </footer>
     </div>
   );

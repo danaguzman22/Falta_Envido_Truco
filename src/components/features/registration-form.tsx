@@ -19,7 +19,6 @@ export function RegistrationForm({ isOpen }: RegistrationFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
     setValue,
     formState: { errors },
     reset,
@@ -27,7 +26,6 @@ export function RegistrationForm({ isOpen }: RegistrationFormProps) {
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       nombreEquipo: "",
-      tipoEquipo: "" as any, // Empezamos vacío para el "Seleccionar..."
       jugador1: "",
       jugador2: "",
       jugador3: "",
@@ -35,9 +33,6 @@ export function RegistrationForm({ isOpen }: RegistrationFormProps) {
     },
   });
 
-  const teamType = watch("tipoEquipo");
-
-  // Sincronizar el teléfono partido con el campo oculto de WhatsApp
   useEffect(() => {
     if (areaCode && phoneNumber) {
       setValue("whatsapp", `549${areaCode}${phoneNumber}`);
@@ -57,10 +52,6 @@ export function RegistrationForm({ isOpen }: RegistrationFormProps) {
   };
 
   const onSubmit = handleSubmit((values) => {
-    if (!values.tipoEquipo) {
-      setSubmitError("Por favor, seleccioná un tipo de equipo.");
-      return;
-    }
     setSubmitError(null);
     setIsPending(true);
 
@@ -99,7 +90,6 @@ export function RegistrationForm({ isOpen }: RegistrationFormProps) {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Nombre del equipo */}
         <label className="space-y-2 md:col-span-2 block">
           <span className="text-sm font-semibold text-tierra-900">Nombre del equipo *</span>
           <input
@@ -111,22 +101,6 @@ export function RegistrationForm({ isOpen }: RegistrationFormProps) {
           />
         </label>
 
-        {/* SELECTOR DESPLEGABLE */}
-        <div className="space-y-2 md:col-span-2 block">
-          <span className="text-sm font-semibold text-tierra-900">Seleccionar tipo de equipo *</span>
-          <select 
-            required
-            className="w-full rounded-xl border-2 border-tierra-300 bg-tierra-50 px-4 py-3 text-tierra-900 outline-none focus:border-oro-500"
-            disabled={!isOpen || isPending}
-            {...register("tipoEquipo")}
-          >
-            <option value="">Seleccionar...</option>
-            <option value="PAREJA">Parejas (2 personas)</option>
-            <option value="EQUIPO_3">Equipo de 3 personas</option>
-          </select>
-        </div>
-
-        {/* Jugador 1 */}
         <label className="space-y-2 block">
           <span className="text-sm font-semibold text-tierra-900">Jugador 1 *</span>
           <input
@@ -138,7 +112,6 @@ export function RegistrationForm({ isOpen }: RegistrationFormProps) {
           />
         </label>
 
-        {/* Jugador 2 */}
         <label className="space-y-2 block">
           <span className="text-sm font-semibold text-tierra-900">Jugador 2 *</span>
           <input
@@ -150,54 +123,57 @@ export function RegistrationForm({ isOpen }: RegistrationFormProps) {
           />
         </label>
 
-        {/* Jugador 3 (Condicional) */}
-        {teamType === "EQUIPO_3" && (
-          <label className="space-y-2 block md:col-span-2">
-            <span className="text-sm font-semibold text-tierra-900">Jugador 3 *</span>
-            <input
-              required
-              className="w-full rounded-xl border-2 border-tierra-300 bg-tierra-50 px-4 py-3 outline-none focus:border-oro-500"
-              placeholder="Nombre y apellido"
-              {...register("jugador3")}
-              onInput={(e) => handleOnlyLetters(e, "jugador3")}
-            />
-          </label>
-        )}
+        <label className="space-y-2 block md:col-span-2">
+          <span className="text-sm font-semibold text-tierra-900">Jugador 3 *</span>
+          <input
+            required
+            className="w-full rounded-xl border-2 border-tierra-300 bg-tierra-50 px-4 py-3 outline-none focus:border-oro-500"
+            placeholder="Nombre y apellido"
+            {...register("jugador3")}
+            onInput={(e) => handleOnlyLetters(e, "jugador3")}
+          />
+        </label>
 
-        {/* TELÉFONO ARGENTINA */}
+{/* CONTENEDOR DEL TELÉFONO ACTUALIZADO Y ALINEADO */}
         <div className="space-y-2 md:col-span-2 block">
-          <span className="text-sm font-semibold text-tierra-900">Teléfono de contacto *</span>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 rounded-xl border-2 border-tierra-300 bg-tierra-100 px-3 py-3 font-bold text-tierra-600">
-              <span>+54 9</span>
+          <label className="text-sm font-semibold text-tierra-900 block">
+            Teléfono de contacto *
+          </label>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Primer cuadro: Código de área (+54 9) */}
+            <div className="flex min-w-[120px] sm:min-w-[140px] items-center justify-between gap-1 rounded-xl border-2 border-tierra-300 bg-tierra-100 px-3 py-3 font-bold text-tierra-600 focus-within:border-oro-500 focus-within:bg-tierra-50 transition-colors">
+              <span className="whitespace-nowrap">+54 9</span>
               <input
                 required
                 type="text"
                 placeholder="260"
+                maxLength={4}
                 className="w-12 bg-transparent text-center outline-none"
                 value={areaCode}
                 onChange={(e) => handleOnlyNumbers(e.target.value, setAreaCode, 4)}
               />
             </div>
+            
             <span className="font-bold text-tierra-400">—</span>
+            
+            {/* Segundo cuadro: Número local */}
             <input
               required
               type="text"
               placeholder="4123456"
-              className="flex-1 rounded-xl border-2 border-tierra-300 bg-tierra-50 px-4 py-3 outline-none focus:border-oro-500"
+              maxLength={8}
+              className="flex-1 rounded-xl border-2 border-tierra-300 bg-tierra-50 px-4 py-3 outline-none focus:border-oro-500 transition-colors"
               value={phoneNumber}
               onChange={(e) => handleOnlyNumbers(e.target.value, setPhoneNumber, 8)}
             />
           </div>
-          <p className="text-xs text-tierra-500 italic mt-1">Ej: 260 — 4123456</p>
+          
+          {/* TEXTO ACLARATORIO */}
+          <p className="mt-1.5 text-xs font-medium text-tierra-600">
+            Aclaración: El código de área (ej: <strong>260</strong>) va en el primer cuadro. El número restante, incluyendo el 4 inicial (ej: <strong>4123456</strong>), va en el segundo.
+          </p>
         </div>
       </div>
-
-      <p className="text-xs text-tierra-400">* Todos los campos son obligatorios</p>
-
-      {submitError && (
-        <div className="rounded-xl border-2 border-red-300 bg-red-50 p-3 text-sm text-red-700">{submitError}</div>
-      )}
 
       <button
         type="submit"

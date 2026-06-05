@@ -9,20 +9,12 @@ const phoneSchema = z
 
 export const registrationSchema = z.object({
   nombreEquipo: z.string().trim().min(3, "El nombre del equipo es obligatorio").max(60, "Nombre demasiado largo"),
-  tipoEquipo: z.enum(["PAREJA", "EQUIPO_3"]),
   jugador1: z.string().trim().min(3, "El Jugador 1 es obligatorio").max(60, "Nombre demasiado largo"),
   jugador2: z.string().trim().min(3, "El Jugador 2 es obligatorio").max(60, "Nombre demasiado largo"),
-  jugador3: z.string().trim().max(60, "Nombre demasiado largo").optional(),
+  jugador3: z.string().trim().min(3, "El Jugador 3 es obligatorio").max(60, "Nombre demasiado largo"),
   whatsapp: phoneSchema,
-}).superRefine((value, context) => {
-  if (value.tipoEquipo === "EQUIPO_3" && !value.jugador3?.trim()) {
-    context.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["jugador3"],
-      message: "El Jugador 3 es obligatorio para equipos de 3",
-    });
-  }
 });
+
 
 export const adminLoginSchema = z.object({
   email: z.string().trim().email("Email inválido").min(1, "Email requerido"),

@@ -48,17 +48,16 @@ export type BracketPreviewMatch = {
   winnerEquipoId: string | null;
 };
 
-type PhaseSource = Pick<Torneo, "estado"> & Partial<Pick<Torneo, "faseActiva">>;
+type PhaseSource = Pick<Torneo, "estado"> ;
 
 function isTorneoFase(value: unknown): value is TorneoFase {
   return torneoFases.includes(value as TorneoFase);
 }
 
 export function getCurrentTorneoFase(torneo: PhaseSource): TorneoFase {
-  if (isTorneoFase(torneo.faseActiva)) {
-    return torneo.faseActiva;
-  }
-
+  // Eliminamos la validación de faseActiva ya que el estado del torneo 
+  // ahora se determina exclusivamente por torneo.estado
+  
   switch (torneo.estado) {
     case "INSCRIPCION_ABIERTA":
       return "INSCRIPCION";

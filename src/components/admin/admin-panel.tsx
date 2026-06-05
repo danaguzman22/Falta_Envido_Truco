@@ -3,9 +3,10 @@
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Clock, LogOut, Settings, Users, Calendar } from "lucide-react";
+import { CheckCircle, Clock, LogOut, Settings, Users, Calendar, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
-// Eliminamos la importación de EquipoTipo que ya no existe
 import type { PublicBracketView } from "@/types";
 
 type AdminPanelProps = {
@@ -205,6 +206,40 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
       setSavingTeamId(null);
     }
   }
+  function exportarPDF() {
+    const doc = new jsPDF();
+    const aprobados = publicView.equipos.filter((e) => e.estado === "APROBADO");
+
+    // Título del PDF
+    doc.setFontSize(18);
+    doc.text("Equipos Aprobados - Torneo de Truco", 14, 20);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+    doc.text(`Total aprobados: ${aprobados.length}`, 14, 28);
+
+    // Preparamos los datos de las filas
+    const tableData = aprobados.map((team) => [
+      team.nombre,
+      team.jugadores[0]?.nombre || "-",
+      team.jugadores[1]?.nombre || "-",
+      team.jugadores[2]?.nombre || "-",
+      team.whatsapp,
+    ]);
+
+    // Dibujamos la tabla
+    autoTable(doc, {
+      startY: 35,
+      head: [["Equipo", "Jugador 1", "Jugador 2", "Jugador 3", "WhatsApp"]],
+      body: tableData,
+      theme: "grid",
+      headStyles: { fillColor: [139, 115, 91] }, // Es el color marrón de tu web (#8B735B)
+      styles: { fontSize: 10 },
+    });
+
+    // Forzamos la descarga
+    doc.save("Equipos_Aprobados.pdf");
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F5DC] text-[#2D241E]">
@@ -261,12 +296,24 @@ export function AdminPanel({ adminUser, publicView }: AdminPanelProps) {
           {/* VISTA MAESTRA O DE PENDIENTES */}
           {activeTab === "inscriptos" || activeTab === "pendientes" ? (
             <div className="animate-fadeIn space-y-5">
-              <div className="flex flex-col gap-3 border-b border-[#8B735B]/10 pb-4 md:flex-row md:items-end md:justify-between">
+              
+              {/* HEADER DE LA TABLA + BOTÓN DE DESCARGA */}
+              <div className="flex flex-col gap-4 border-b border-[#8B735B]/10 pb-4 md:flex-row md:items-end md:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.3em] text-stone-500">Gestión de inscriptos</p>
                   <h2 className="mt-1 text-2xl font-bold text-[#2D241E]">{listTitle}</h2>
                 </div>
-                <StatusPill label={publicView.torneo.estado} active={publicView.torneo.estado === "INSCRIPCION_ABIERTA"} />
+                
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={exportarPDF}
+                    type="button"
+                    className="flex items-center gap-2 rounded-xl border border-emerald-600 bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100"
+              >
+                <Download size={16} /> Descargar Aprobados (PDF)
+              </button>
+                  <StatusPill label={publicView.torneo.estado} active={publicView.torneo.estado === "INSCRIPCION_ABIERTA"} />
+                </div>
               </div>
 
               {!canDeleteTeams ? (

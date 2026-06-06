@@ -38,8 +38,8 @@ export function HeroSection({ waitingTeams, approvedTeams }: HeroSectionProps) {
             </h1>
 
             <p className="mx-auto mb-8 max-w-3xl text-lg font-medium leading-relaxed text-slate-100 drop-shadow-md md:text-xl">
-              Plataforma de inscripción, validación y generación de llave eliminatoria para {NOMBRE_UNIVERSIDAD}. 
-              Únete a este torneo tradicional de truco donde la estrategia y el conocimiento se encuentran.
+              Plataforma de inscripción, para torneo "{NOMBRE_TORNEO}" de {NOMBRE_UNIVERSIDAD}. 
+              Registrá tu equipo, seguí el estado de tu inscripción y preparate para competir en el torneo de truco más emocionante del año. ¡Que comience la partida!
             </p>
 
             {/* BADGES CENTRALES MODIFICADOS */}

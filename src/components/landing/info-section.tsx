@@ -26,7 +26,7 @@ export function InfoSection() {
                 <Calendar className="h-8 w-8 text-oro-600" />
               </div>
               <h3 className="mb-2 font-serif text-xl font-bold text-tierra-900">Fecha</h3>
-              <p className="font-medium text-tierra-600">Sábado, 28 de Junio de 2026</p>
+              <p className="font-medium text-tierra-600">Domingo, 28 de Junio de 2026</p>
             </div>
 
             {/* Hora */}

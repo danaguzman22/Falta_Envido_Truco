@@ -46,7 +46,7 @@ export function HeroSection({ waitingTeams, approvedTeams }: HeroSectionProps) {
             <div className="flex flex-col items-center justify-center gap-6 pt-6 sm:flex-row">
               <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
                 <Calendar className="h-5 w-5 text-oro-400" />
-                <span className="font-medium">20/06/2026</span>
+                <span className="font-medium">28/06/2026</span>
               </div>
               <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
                 <Trophy className="h-5 w-5 text-oro-400" />
